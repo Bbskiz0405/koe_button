@@ -4,18 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>心咲koe哈欠按鈕</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary-color: #a18cd1;  
+      --secondary-color: #fbc2eb;
+      --dark-bg: #1e1e3f;
+      --darker-bg: #15152c;
+      --menu-bg: rgba(0, 0, 50, 0.4);
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --button-bg: rgba(255, 255, 255, 0.08);
+      --button-hover: rgba(255, 255, 255, 0.15);
+      --text-color: #fff;
+      --header-height: 60px;
+      --transition-speed: 0.3s;
     }
 
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #1e1e3f, #2a2a6f);
-      color: #fff;
+      min-height: 100vh;
+      font-family: 'Noto Sans TC', 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== Loader ===== */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--dark-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid var(--primary-color);
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     /* ===== Header ===== */
@@ -24,22 +72,23 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 60px;
-      background: rgba(0, 0, 50, 0.4);
+      height: var(--header-height);
+      background: var(--menu-bg);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 24px;
       z-index: 1001;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .site-title {
       font-size: 20px;
+      font-weight: 700;
       margin: 0;
-      color: #fff;
-      background: linear-gradient(to right, #a18cd1, #fbc2eb);
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -47,34 +96,42 @@
     }
 
     .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
       font-size: 24px;
       cursor: pointer;
-      padding: 8px 12px;
       border-radius: 8px;
-      transition: 0.3s;
+      transition: var(--transition-speed);
       background: rgba(255,255,255,0.1);
       backdrop-filter: blur(8px);
-      color: #fff;
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--text-color);
     }
 
     .menu-toggle:hover {
       background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
     }
 
     /* ===== Side Menu ===== */
     .side-menu {
       position: fixed;
-      top: 60px;
-      right: -260px;
-      width: 240px;
-      height: calc(100% - 60px);
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(12px);
+      top: var(--header-height);
+      right: -300px;
+      width: 280px;
+      height: calc(100% - var(--header-height));
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       color: white;
       padding: 30px 20px;
-      box-shadow: -2px 0 12px rgba(0,0,0,0.3);
-      transition: right 0.3s ease;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+      transition: right var(--transition-speed) ease;
       z-index: 1000;
+      overflow-y: auto;
     }
 
     .side-menu.active {
@@ -83,10 +140,11 @@
 
     .side-menu h2 {
       margin-top: 0;
-      font-size: 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.3);
-      padding-bottom: 10px;
+      font-size: 22px;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+      padding-bottom: 12px;
       margin-bottom: 20px;
+      color: var(--primary-color);
     }
 
     .side-menu ul {
@@ -95,136 +153,407 @@
     }
 
     .side-menu li {
-      margin: 15px 0;
+      margin: 18px 0;
     }
 
     .side-menu a {
-      color: #ffffff;
+      display: block;
+      color: var(--text-color);
       text-decoration: none;
-      transition: 0.2s;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
     }
 
     .side-menu a:hover {
-      color: #b4a2ff;
+      background: rgba(255,255,255,0.1);
+      color: var(--secondary-color);
+      transform: translateX(5px);
+    }
+
+    /* ===== Main Content ===== */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--header-height) + 40px) 16px 40px;
+      width: 100%;
     }
 
     /* ===== Main Card ===== */
     .main-card {
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 20px;
+      background: var(--card-bg);
+      border-radius: 24px;
       padding: 40px 32px;
-      margin: 100px auto 40px auto;
-      width: 90%;
+      width: 95%;
       max-width: 800px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.2);
       text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .card-title {
+      font-size: 28px;
+      margin-bottom: 32px;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .button-container {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 20px;
       justify-content: center;
-      gap: 16px 24px;
     }
 
     .yawn-button {
       backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, 0.08);
+      -webkit-backdrop-filter: blur(8px);
+      background: var(--button-bg);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
+      color: var(--text-color);
       font-size: 16px;
       font-weight: 600;
-      padding: 14px 20px;
-      border-radius: 12px;
+      padding: 16px;
+      border-radius: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-width: 100px;
-      box-shadow: inset 0 0 0 rgba(0,0,0,0);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .yawn-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
     }
 
     .yawn-button:hover {
-      background: rgba(255, 255, 255, 0.15);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .yawn-button:hover::before {
+      opacity: 0.2;
     }
 
     .yawn-button:active {
-      transform: scale(0.97);
+      transform: scale(0.95);
+    }
+
+    .yawn-button.playing {
+      animation: pulse 1s infinite alternate;
+      background: linear-gradient(135deg, rgba(161, 140, 209, 0.3), rgba(251, 194, 235, 0.3));
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 5px rgba(161, 140, 209, 0.5); }
+      100% { box-shadow: 0 0 20px rgba(251, 194, 235, 0.8); }
+    }
+
+    /* Audio visualizer */
+    .visualizer-container {
+      margin-top: 30px;
+      height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .visualizer-container.active {
+      opacity: 1;
+    }
+
+    .visualizer-bar {
+      width: 6px;
+      height: 10px;
+      background: var(--primary-color);
+      border-radius: 3px;
+      transition: height 0.1s ease;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      width: 100%;
+      padding: 20px;
+      text-align: center;
+      background: var(--menu-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-top: auto;
+    }
+
+    .footer p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 768px) {
+      .main-card {
+        padding: 30px 20px;
+      }
+
+      .button-container {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 16px;
+      }
+
+      .yawn-button {
+        padding: 14px;
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-header {
+        padding: 0 16px;
+      }
+
+      .site-title {
+        font-size: 18px;
+      }
+
+      .main-card {
+        padding: 24px 16px;
+      }
+
+      .button-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 12px;
+      }
+
+      .yawn-button {
+        padding: 12px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- 加載動畫 -->
+  <div class="loader-container" id="loaderContainer">
+    <div class="loader"></div>
+  </div>
 
-  <!-- Header -->
+  <!-- 頭部 -->
   <header class="main-header">
     <h1 class="site-title">心咲koe哈欠按鈕</h1>
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <div class="menu-toggle" id="menuToggle" aria-label="開啟選單">☰</div>
   </header>
 
   <!-- 側邊選單 -->
   <div id="sideMenu" class="side-menu">
     <h2>選單</h2>
     <ul>
-      <li><a href="#">關於本站</a></li>
-      <li><a href="#">更多音效</a></li>
-      <li><a href="#">聯絡我們</a></li>
+      <li><a href="#about">關於本站</a></li>
+      <li><a href="#more-sounds">更多音效</a></li>
+      <li><a href="#contact">聯絡我們</a></li>
+      <li><a href="#support">支持心咲koe</a></li>
     </ul>
   </div>
 
-  <!-- 主卡片 -->
-  <div class="main-card">
-    <div class="button-container">
-      <button class="yawn-button" onclick="playSound('yawn1')">哈欠1</button>
-      <button class="yawn-button" onclick="playSound('yawn2')">哈欠2</button>
-      <button class="yawn-button" onclick="playSound('yawn3')">哈欠3</button>
-      <button class="yawn-button" onclick="playSound('yawn4')">哈欠4</button>
-      <button class="yawn-button" onclick="playSound('yawn5')">哈欠5</button>
-      <button class="yawn-button" onclick="playSound('yawn6')">哈欠6</button>
-      <button class="yawn-button" onclick="playSound('yawn7')">哈欠7</button>
-      <button class="yawn-button" onclick="playSound('yawn8')">哈欠8</button>
+  <!-- 主要內容 -->
+  <main class="main-content">
+    <!-- 主卡片 -->
+    <div class="main-card">
+      <h2 class="card-title">心咲koe的哈欠集合</h2>
+      <div class="button-container">
+        <button class="yawn-button" data-sound="yawn1">哈欠 1</button>
+        <button class="yawn-button" data-sound="yawn2">哈欠 2</button>
+        <button class="yawn-button" data-sound="yawn3">哈欠 3</button>
+        <button class="yawn-button" data-sound="yawn4">哈欠 4</button>
+        <button class="yawn-button" data-sound="yawn5">哈欠 5</button>
+        <button class="yawn-button" data-sound="yawn6">哈欠 6</button>
+        <button class="yawn-button" data-sound="yawn7">哈欠 7</button>
+        <button class="yawn-button" data-sound="yawn8">哈欠 8</button>
+      </div>
+
+      <!-- 音頻可視化器 -->
+      <div class="visualizer-container" id="visualizer">
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+        <div class="visualizer-bar"></div>
+      </div>
     </div>
-  </div>
+  </main>
+
+  <!-- 頁腳 -->
+  <footer class="footer">
+    <p>© 2025 心咲koe哈欠按鈕 | 音頻資源僅供個人使用</p>
+  </footer>
 
   <!-- Script -->
   <script>
-    function playSound(soundName) {
-      const sounds = {
-        yawn1: 'sounds/yawn1.mp3',
-        yawn2: 'sounds/yawn2.mp3',
-        yawn3: 'sounds/yawn3.mp3',
-        yawn4: 'sounds/yawn4.mp3',
-        yawn5: 'sounds/yawn5.mp3',
-        yawn6: 'sounds/yawn6.mp3',
-        yawn7: 'sounds/yawn7.mp3',
-        yawn8: 'sounds/yawn8.mp3'
-      };
-      const audio = new Audio(sounds[soundName]);
-      audio.play();
-    }
+    // 音頻路徑映射
+    const soundPaths = {
+      yawn1: 'sounds/yawn1.mp3',
+      yawn2: 'sounds/yawn2.mp3',
+      yawn3: 'sounds/yawn3.mp3',
+      yawn4: 'sounds/yawn4.mp3',
+      yawn5: 'sounds/yawn5.mp3',
+      yawn6: 'sounds/yawn6.mp3',
+      yawn7: 'sounds/yawn7.mp3',
+      yawn8: 'sounds/yawn8.mp3'
+    };
 
-    function toggleMenu() {
-      const menu = document.getElementById("sideMenu");
-      menu.classList.toggle("active");
+    // 預加載音頻檔案
+    const audioFiles = {};
+    let currentAudio = null;
+    let currentButton = null;
 
-      if (menu.classList.contains("active")) {
+    // 頁面加載後執行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 隱藏加載動畫
+      setTimeout(() => {
+        document.getElementById('loaderContainer').style.opacity = '0';
         setTimeout(() => {
-          document.addEventListener("click", handleOutsideClick);
-        }, 10);
-      } else {
-        document.removeEventListener("click", handleOutsideClick);
-      }
+          document.getElementById('loaderContainer').style.display = 'none';
+        }, 500);
+      }, 1000);
+
+      // 預加載音頻
+      preloadAudio();
+
+      // 設置按鈕點擊事件
+      setupButtons();
+
+      // 設置側邊欄
+      setupSideMenu();
+    });
+
+    // 預加載音頻檔案
+    function preloadAudio() {
+      Object.keys(soundPaths).forEach(key => {
+        audioFiles[key] = new Audio(soundPaths[key]);
+        audioFiles[key].preload = 'auto';
+      });
     }
 
-    function handleOutsideClick(e) {
-      const menu = document.getElementById("sideMenu");
-      const toggle = document.querySelector(".menu-toggle");
-
-      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-        menu.classList.remove("active");
-        document.removeEventListener("click", handleOutsideClick);
+    // 播放音頻
+    function playSound(soundName, button) {
+      // 如果有正在播放的音頻，停止它
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        if (currentButton) {
+          currentButton.classList.remove('playing');
+        }
       }
+
+      // 播放新的音頻
+      const audio = audioFiles[soundName];
+      audio.currentTime = 0;
+      
+      // 設置音頻結束後的事件
+      audio.onended = () => {
+        button.classList.remove('playing');
+        document.getElementById('visualizer').classList.remove('active');
+      };
+
+      // 播放音頻
+      audio.play()
+        .then(() => {
+          // 添加播放中的視覺效果
+          button.classList.add('playing');
+          currentAudio = audio;
+          currentButton = button;
+          
+          // 啟動可視化效果
+          document.getElementById('visualizer').classList.add('active');
+          animateVisualizer();
+        })
+        .catch(error => {
+          console.error('播放失敗:', error);
+        });
+    }
+
+    // 設置按鈕點擊事件
+    function setupButtons() {
+      const buttons = document.querySelectorAll('.yawn-button');
+      buttons.forEach(button => {
+        button.addEventListener('click', function() {
+          const soundName = this.dataset.sound;
+          playSound(soundName, this);
+        });
+      });
+    }
+
+    // 設置側邊欄行為
+    function setupSideMenu() {
+      const menuToggle = document.getElementById('menuToggle');
+      const sideMenu = document.getElementById('sideMenu');
+
+      menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sideMenu.classList.toggle('active');
+      });
+
+      // 點擊其他區域關閉選單
+      document.addEventListener('click', (e) => {
+        if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+          sideMenu.classList.remove('active');
+        }
+      });
+
+      // 點擊選單鏈接關閉選單
+      const menuLinks = sideMenu.querySelectorAll('a');
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          sideMenu.classList.remove('active');
+        });
+      });
+    }
+
+    // 音頻可視化器動畫
+    function animateVisualizer() {
+      if (!currentAudio) return;
+
+      const visualizerBars = document.querySelectorAll('.visualizer-bar');
+      
+      function updateBars() {
+        if (!currentAudio || currentAudio.paused) {
+          visualizerBars.forEach(bar => {
+            bar.style.height = '10px';
+          });
+          return;
+        }
+
+        visualizerBars.forEach(bar => {
+          const height = Math.floor(Math.random() * 40) + 10;
+          bar.style.height = `${height}px`;
+        });
+
+        requestAnimationFrame(updateBars);
+      }
+
+      updateBars();
     }
   </script>
 </body>
