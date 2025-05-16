@@ -411,9 +411,9 @@
 
   <!-- Script -->
   <script>
-    // 音頻路徑映射
+    // 音頻路徑映射 - 修正路徑
     const soundPaths = {
-      yawn1: 'sounds/5_10_1_45.mp3',
+      yawn1: 'sounds/5_10_1_45.mp3',  // 修正路徑
       yawn2: 'sounds/yawn2.mp3',
       yawn3: 'sounds/yawn3.mp3',
       yawn4: 'sounds/yawn4.mp3',
@@ -451,13 +451,36 @@
     // 預加載音頻檔案
     function preloadAudio() {
       Object.keys(soundPaths).forEach(key => {
-        audioFiles[key] = new Audio(soundPaths[key]);
-        audioFiles[key].preload = 'auto';
+        try {
+          audioFiles[key] = new Audio(soundPaths[key]);
+          audioFiles[key].preload = 'auto';
+          
+          // 添加錯誤處理
+          audioFiles[key].onerror = function() {
+            console.warn(`無法加載音頻: ${soundPaths[key]}`);
+            // 禁用相應的按鈕
+            const button = document.querySelector(`.yawn-button[data-sound="${key}"]`);
+            if (button) {
+              button.disabled = true;
+              button.style.opacity = "0.5";
+              button.title = "音頻檔案不可用";
+            }
+          };
+        } catch (error) {
+          console.error(`加載音頻時出錯: ${soundPaths[key]}`, error);
+        }
       });
     }
 
     // 播放音頻
     function playSound(soundName, button) {
+      // 檢查音頻是否存在
+      if (!audioFiles[soundName]) {
+        console.error(`音頻 ${soundName} 未找到`);
+        alert('抱歉，這個音頻檔案無法播放。');
+        return;
+      }
+      
       // 如果有正在播放的音頻，停止它
       if (currentAudio) {
         currentAudio.pause();
@@ -491,6 +514,7 @@
         })
         .catch(error => {
           console.error('播放失敗:', error);
+          alert('播放音頻時出錯。可能是瀏覽器限制自動播放功能，或者音頻檔案有問題。');
         });
     }
 
