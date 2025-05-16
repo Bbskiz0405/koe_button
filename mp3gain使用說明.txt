@@ -1,0 +1,31 @@
+
+🎵 MP3 音量標準化操作說明（使用 mp3gain）
+
+📁 目標資料夾  
+本專案音訊檔案位置：
+/Users/brayden.wu/Desktop/vs_project/koe_button/sounds
+
+✅ 安裝 mp3gain（只需一次）
+若尚未安裝 Homebrew，請先執行：
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+安裝完成後，貼上螢幕顯示的 echo 指令來完成設定。  
+然後安裝 mp3gain：
+brew install mp3gain
+
+🎚️ 將所有 MP3 音量標準化（防爆音）
+mp3gain -r -k /Users/brayden.wu/Desktop/vs_project/koe_button/sounds/*.mp3
+
+- -r：Track Gain 模式（每首單獨調整）
+- -k：避免剪音 clipping（推薦加）
+
+🔄 若要還原音量調整：
+mp3gain -u /Users/brayden.wu/Desktop/vs_project/koe_button/sounds/*.mp3
+
+🔍 想查看目前音量資訊（分析模式）：
+mp3gain -s c /Users/brayden.wu/Desktop/vs_project/koe_button/sounds/*.mp3
+
+🌲 遞迴處理子資料夾中的 MP3（選用）：
+find /Users/brayden.wu/Desktop/vs_project/koe_button/sounds -name "*.mp3" -exec mp3gain -r -k {} \;
+
+如需更多功能，可輸入 man mp3gain 查看使用說明。
