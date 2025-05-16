@@ -404,33 +404,44 @@
     </div>
   </main>
 
-  <!-- 頁腳 -->
+    <!-- 頁腳 -->
   <footer class="footer">
     <p>© 2025 心咲koe哈欠按鈕 | 音頻資源僅供個人使用</p>
+    <div id="audioStatus" style="margin-top:10px; font-size:12px; color:#fbc2eb;"></div>
   </footer>
 
   <!-- Script -->
   <script>
-    // 音頻路徑映射 - 修正路徑
+        // 音頻路徑映射 - 使用CDN作為備選方案
     const soundPaths = {
-      yawn1: 'sounds/5_10_1_45.mp3',  // 修正路徑
-      yawn2: 'sounds/yawn2.mp3',
-      yawn3: 'sounds/yawn3.mp3',
-      yawn4: 'sounds/yawn4.mp3',
-      yawn5: 'sounds/yawn5.mp3',
-      yawn6: 'sounds/yawn6.mp3',
-      yawn7: 'sounds/yawn7.mp3',
-      yawn8: 'sounds/yawn8.mp3'
+      yawn1: '/koe_button/sounds/5_10_1_45.mp3',// 主要路徑
+      yawn2: '/sounds/yawn2.mp3',
+      yawn3: '/sounds/yawn3.mp3',
+      yawn4: '/sounds/yawn4.mp3',
+      yawn5: '/sounds/yawn5.mp3',
+      yawn6: '/sounds/yawn6.mp3',
+      yawn7: '/sounds/yawn7.mp3',
+      yawn8: '/sounds/yawn8.mp3'
     };
+    
+    // 備用CDN路徑 - 如果有的話，可以放到這裡
+    const fallbackPaths = {
+      yawn1: 'https://example.com/sounds/5_10_1_45.mp3', // 替換為您的CDN連結
+      // 其他音訊文件...
+    };
+    
+    // 如果您的網站在子目錄中，請使用:
+    // const repoName = 'your-repo-name'; // 替換為您的儲存庫名稱
+    // const basePath = `/${repoName}`;
 
     // 預加載音頻檔案
     const audioFiles = {};
     let currentAudio = null;
     let currentButton = null;
 
-    // 頁面加載後執行
+    // 添加調試按鈕
     document.addEventListener('DOMContentLoaded', () => {
-      // 隱藏加載動畫
+      // 原有的代碼保持不變
       setTimeout(() => {
         document.getElementById('loaderContainer').style.opacity = '0';
         setTimeout(() => {
@@ -446,28 +457,153 @@
 
       // 設置側邊欄
       setupSideMenu();
+      
+      // 添加調試按鈕
+      addDebugButton();
     });
+    
+    // 添加調試功能
+    function addDebugButton() {
+      const footer = document.querySelector('.footer');
+      const debugBtn = document.createElement('button');
+      debugBtn.textContent = '檢查音訊狀態';
+      debugBtn.style.padding = '8px';
+      debugBtn.style.margin = '10px auto';
+      debugBtn.style.background = 'rgba(255,255,255,0.1)';
+      debugBtn.style.color = 'white';
+      debugBtn.style.border = 'none';
+      debugBtn.style.borderRadius = '4px';
+      debugBtn.style.cursor = 'pointer';
+      debugBtn.style.display = 'block';
+      
+      debugBtn.onclick = function() {
+        checkAudioStatus();
+      };
+      
+      footer.insertBefore(debugBtn, footer.firstChild);
+    }
+    
+    // 檢查所有音訊的狀態
+    function checkAudioStatus() {
+      let statusReport = "音訊檔案狀態報告:\n\n";
+      
+      Object.keys(audioFiles).forEach(key => {
+        const audio = audioFiles[key];
+        const path = soundPaths[key];
+        
+        statusReport += `${key}:\n`;
+        statusReport += `- 路徑: ${path}\n`;
+        statusReport += `- 就緒狀態: ${getReadyStateText(audio.readyState)}\n`;
+        statusReport += `- 網路狀態: ${getNetworkStateText(audio.networkState)}\n`;
+        statusReport += `- 錯誤: ${audio.error ? audio.error.code : '無'}\n\n`;
+      });
+      
+      alert(statusReport);
+      console.log(statusReport);
+      
+      // 測試簡單音訊播放
+      try {
+        const testAudio = new Audio();
+        testAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+        testAudio.play().then(() => {
+          console.log('瀏覽器允許音訊播放');
+          alert('瀏覽器允許音訊播放');
+        }).catch(e => {
+          console.error('瀏覽器阻止音訊播放', e);
+          alert('瀏覽器阻止音訊播放: ' + e.message);
+        });
+      } catch (e) {
+        console.error('測試音訊時出錯', e);
+      }
+    }
+    
+    // 獲取就緒狀態文本說明
+    function getReadyStateText(state) {
+      const states = [
+        'HAVE_NOTHING: 沒有資訊',
+        'HAVE_METADATA: 有元數據',
+        'HAVE_CURRENT_DATA: 有當前數據',
+        'HAVE_FUTURE_DATA: 有未來數據',
+        'HAVE_ENOUGH_DATA: 有足夠數據'
+      ];
+      return states[state] || '未知';
+    }
+    
+    // 獲取網路狀態文本說明
+    function getNetworkStateText(state) {
+      const states = [
+        'NETWORK_EMPTY: 未初始化',
+        'NETWORK_IDLE: 閒置',
+        'NETWORK_LOADING: 加載中',
+        'NETWORK_NO_SOURCE: 無可用來源'
+      ];
+      return states[state] || '未知';
+    }
 
-    // 預加載音頻檔案
+        // 預加載音頻檔案
     function preloadAudio() {
+      // 檢測是否在GitHub Pages上運行，並調整路徑
+      const isGitHubPages = window.location.hostname.includes('github.io');
+      const repoName = window.location.pathname.split('/')[1]; // 獲取儲存庫名稱
+      const statusDiv = document.getElementById('audioStatus');
+      
+      // 設置初始狀態信息
+      statusDiv.textContent = "正在嘗試載入音訊檔案...";
+      
       Object.keys(soundPaths).forEach(key => {
         try {
-          audioFiles[key] = new Audio(soundPaths[key]);
+          // 調整路徑以適應GitHub Pages
+          let audioPath = soundPaths[key];
+          if (isGitHubPages && repoName) {
+            // 如果是在GitHub Pages且不是個人頁面的根目錄
+            audioPath = `/${repoName}${audioPath}`;
+          }
+          
+          console.log(`嘗試加載音頻: ${audioPath}`);
+          audioFiles[key] = new Audio(audioPath);
           audioFiles[key].preload = 'auto';
           
           // 添加錯誤處理
           audioFiles[key].onerror = function() {
-            console.warn(`無法加載音頻: ${soundPaths[key]}`);
-            // 禁用相應的按鈕
-            const button = document.querySelector(`.yawn-button[data-sound="${key}"]`);
-            if (button) {
-              button.disabled = true;
-              button.style.opacity = "0.5";
-              button.title = "音頻檔案不可用";
+            console.warn(`無法加載音頻: ${audioPath}，嘗試備用路徑`);
+            
+            // 嘗試使用備用路徑
+            if (fallbackPaths && fallbackPaths[key]) {
+              console.log(`嘗試使用備用路徑: ${fallbackPaths[key]}`);
+              audioFiles[key] = new Audio(fallbackPaths[key]);
+              
+              // 為備用路徑添加事件處理
+              audioFiles[key].onerror = function() {
+                console.error(`備用路徑也無法加載: ${fallbackPaths[key]}`);
+                const button = document.querySelector(`.yawn-button[data-sound="${key}"]`);
+                if (button) {
+                  button.disabled = true;
+                  button.style.opacity = "0.5";
+                  button.title = "音頻檔案不可用";
+                }
+                
+                statusDiv.textContent += `\n無法載入音訊檔案 ${key}`;
+              };
+            } else {
+              // 沒有備用路徑，禁用按鈕
+              const button = document.querySelector(`.yawn-button[data-sound="${key}"]`);
+              if (button) {
+                button.disabled = true;
+                button.style.opacity = "0.5";
+                button.title = "音頻檔案不可用";
+              }
             }
           };
+          
+          // 添加測試事件
+          audioFiles[key].addEventListener('canplaythrough', function() {
+            console.log(`音頻已成功載入: ${audioPath}`);
+            statusDiv.textContent = `音訊檔案已成功載入，可以點擊播放`;
+          });
+          
         } catch (error) {
           console.error(`加載音頻時出錯: ${soundPaths[key]}`, error);
+          statusDiv.textContent += `\n載入音訊檔案時出錯: ${error.message}`;
         }
       });
     }
@@ -500,22 +636,38 @@
         document.getElementById('visualizer').classList.remove('active');
       };
 
+      // 顯示調試信息
+      console.log(`嘗試播放音頻: ${soundPaths[soundName]}`);
+      console.log('音頻元素:', audio);
+      console.log('音頻狀態:', {
+        ready: audio.readyState,
+        networkState: audio.networkState,
+        error: audio.error
+      });
+      
       // 播放音頻
-      audio.play()
-        .then(() => {
-          // 添加播放中的視覺效果
-          button.classList.add('playing');
-          currentAudio = audio;
-          currentButton = button;
-          
-          // 啟動可視化效果
-          document.getElementById('visualizer').classList.add('active');
-          animateVisualizer();
-        })
-        .catch(error => {
-          console.error('播放失敗:', error);
-          alert('播放音頻時出錯。可能是瀏覽器限制自動播放功能，或者音頻檔案有問題。');
-        });
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('音頻播放成功!');
+            // 添加播放中的視覺效果
+            button.classList.add('playing');
+            currentAudio = audio;
+            currentButton = button;
+            
+            // 啟動可視化效果
+            document.getElementById('visualizer').classList.add('active');
+            animateVisualizer();
+          })
+          .catch(error => {
+            console.error('播放失敗:', error);
+            alert(`播放音頻時出錯: ${error.message}。可能是瀏覽器限制自動播放功能，或者音頻檔案有問題。`);
+          });
+      } else {
+        console.warn('瀏覽器不支持音頻播放承諾API');
+      }
     }
 
     // 設置按鈕點擊事件
