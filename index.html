@@ -206,6 +206,43 @@
       -webkit-text-fill-color: transparent;
     }
 
+    /* 模態框樣式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 8px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
     .button-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -355,6 +392,17 @@
     <div class="loader"></div>
   </div>
 
+  <!-- 關於網站彈窗 -->
+  <div id="aboutModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAboutModal()">&times;</span>
+      <h2>關於網站</h2>
+      <p>心咲koe哈欠按鈕是一個專門為心咲koe的哈欠音效提供播放功能的網站。</p>
+      <p>您可以通過這個網站輕鬆播放心咲koe的各種哈欠音效，並且可以通過側邊欄的連結關注心咲koe的社交媒體。</p>
+      <p>如果您喜歡這個網站，請考慮支持心咲koe！</p>
+    </div>
+  </div>
+
   <!-- 頭部 -->
   <header class="main-header">
     <h1 class="site-title">心咲koe哈欠按鈕</h1>
@@ -369,6 +417,7 @@
       <li><a href="https://x.com/KOE__zzZ" target="_blank" rel="noopener">X (Twitter)</a></li>
       <li><a href="https://www.instagram.com/koe__zzz/" target="_blank" rel="noopener">Instagram</a></li>
       <li><a href="https://lit.link/en/iamkoe" target="_blank" rel="noopener">支持心咲koe</a></li>
+      <li><a href="#about" onclick="showAboutModal()">關於網站</a></li>
     </ul>
   </div>
 
@@ -731,6 +780,29 @@
       }
 
       updateBars();
+    }
+
+    // 關於網站彈窗相關函數
+    function showAboutModal() {
+      document.getElementById('aboutModal').style.display = 'block';
+    }
+
+    function closeAboutModal() {
+      document.getElementById('aboutModal').style.display = 'none';
+    }
+
+    // 當點擊彈窗外部時關閉彈窗
+    window.onclick = function(event) {
+      var modal = document.getElementById('aboutModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+  </script>
+
+  <script>
+    function addDebugButton() {
+      // Add your code here
     }
   </script>
 </body>
