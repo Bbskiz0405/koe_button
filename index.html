@@ -249,14 +249,13 @@
     }
 
     .button-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 24px 32px;
-  justify-content: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-start;
   width: 100%;
   margin: 0 auto;
-  padding: 0 8px 8px 8px;
-  box-sizing: border-box;
+  padding: 0;
 }
 
     .yawn-button {
@@ -393,9 +392,65 @@
         font-size: 14px;
       }
     }
-  </style>
+  .glass-card {
+  width: 100%;
+  max-width: 1400px;
+  min-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  padding: 32px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-start;
+  background: none;
+  box-shadow: none;
+  padding: 24px;
+}
+.candy-btn {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  display: inline-block;
+  width: auto;
+  min-width: 64px;
+  max-width: 100%;
+  word-break: break-word;
+  margin: 8px 8px 0 0;
+  vertical-align: top;
+
+  border: none;
+  outline: none;
+  padding: 0.7em 2.2em;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #fcb69f 0%, #ffecd2 100%);
+  color: #5a2d82;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 10px rgba(252, 182, 159, 0.2);
+  transition: transform 0.13s, box-shadow 0.13s, background 0.3s;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  backdrop-filter: blur(2px);
+}
+.candy-btn:hover {
+  background: linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%);
+  color: #2d3562;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 24px rgba(161, 196, 253, 0.3);
+}
+</style>
 </head>
 <body>
+  
   <!-- 加載動畫 -->
   <div class="loader-container" id="loaderContainer">
     <div class="loader"></div>
@@ -433,34 +488,34 @@
   <!-- 主要內容 -->
   <main class="main-content">
     <!-- 主卡片 -->
-    <div class="main-card">
+    <div class="main-card glass-card">
       <h2 class="card-title">心咲koe的哈欠集合</h2>
       <div class="button-container">
-        <button class="yawn-button" data-sound="yawn1">哈姆</button>
-        <button class="yawn-button" data-sound="yawn2">哈嗨ㄏㄚˋ</button>
-        <button class="yawn-button" data-sound="yawn3">哈ㄚ</button>
-        <button class="yawn-button" data-sound="yawn4">這個是日文歌還是英文歌呢</button>
-        <button class="yawn-button" data-sound="yawn5">哈疑疑</button>
-        <button class="yawn-button" data-sound="yawn6">美聲哈欠</button>
-        <button class="yawn-button" data-sound="yawn7">剛剛那也是哈欠</button>
-        <button class="yawn-button" data-sound="yawn8">前半段是哈欠</button>
-        <button class="yawn-button" data-sound="yawn9">講到哈欠又想打哈欠了 哈ㄏㄧ</button>
-        <button class="yawn-button" data-sound="yawn10">一一哈嗨哈（音效</button>
-        <button class="yawn-button" data-sound="yawn11">我們剛好先等垃圾車唱完</button>
-        <button class="yawn-button" data-sound="yawn12">哈ㄏㄚˋ</button>
-        <button class="yawn-button" data-sound="yawn13">這個版本我沒聽過ㄟ</button>
-        <button class="yawn-button" data-sound="yawn14">好想睡覺歐 疑呀</button>
-        <button class="yawn-button" data-sound="yawn15">嗚歐 哈嗨</button>
-        <button class="yawn-button" data-sound="yawn16">剛剛那是哈欠 沒錯</button>
-        <button class="yawn-button" data-sound="yawn17">啊哈哈$%^&</button>
-        <button class="yawn-button" data-sound="yawn18">剛剛那個是哈欠嗎</button>
-        <button class="yawn-button" data-sound="yawn19">下一首</button>
-        <button class="yawn-button" data-sound="yawn20">哈～～（吸氣版</button>
-        <button class="yawn-button" data-sound="yawn21">剛剛那是哈欠但是吸氣版的</button>
-        <button class="yawn-button" data-sound="yawn22">嗚！剛那是哈欠</button>
-        <button class="yawn-button" data-sound="yawn23">哈 啊啊啊～</button>
-        <button class="yawn-button" data-sound="yawn24">哈ㄚㄚㄚOK</button>
-        <button class="yawn-button" data-sound="yawn25">哈（抖音斜向下</button>
+        <button class="candy-btn" data-sound="yawn1">哈姆</button>
+        <button class="candy-btn" data-sound="yawn2">哈嗨ㄏㄚˋ</button>
+        <button class="candy-btn" data-sound="yawn3">哈ㄚ</button>
+        <button class="candy-btn" data-sound="yawn4">這個是日文歌還是英文歌呢</button>
+        <button class="candy-btn" data-sound="yawn5">哈疑疑</button>
+        <button class="candy-btn" data-sound="yawn6">美聲哈欠</button>
+        <button class="candy-btn" data-sound="yawn7">剛剛那也是哈欠</button>
+        <button class="candy-btn" data-sound="yawn8">前半段是哈欠</button>
+        <button class="candy-btn" data-sound="yawn9">講到哈欠又想打哈欠了 哈ㄏㄧ</button>
+        <button class="candy-btn" data-sound="yawn10">一一哈嗨哈（音效</button>
+        <button class="candy-btn" data-sound="yawn11">我們剛好先等垃圾車唱完</button>
+        <button class="candy-btn" data-sound="yawn12">哈ㄏㄚˋ</button>
+        <button class="candy-btn" data-sound="yawn13">這個版本我沒聽過ㄟ</button>
+        <button class="candy-btn" data-sound="yawn14">好想睡覺歐 疑呀</button>
+        <button class="candy-btn" data-sound="yawn15">嗚歐 哈嗨</button>
+        <button class="candy-btn" data-sound="yawn16">剛剛那是哈欠 沒錯</button>
+        <button class="candy-btn" data-sound="yawn17">啊哈哈$%^&</button>
+        <button class="candy-btn" data-sound="yawn18">剛剛那個是哈欠嗎</button>
+        <button class="candy-btn" data-sound="yawn19">下一首</button>
+        <button class="candy-btn" data-sound="yawn20">哈～～（吸氣版</button>
+        <button class="candy-btn" data-sound="yawn21">剛剛那是哈欠但是吸氣版的</button>
+        <button class="candy-btn" data-sound="yawn22">嗚！剛那是哈欠</button>
+        <button class="candy-btn" data-sound="yawn23">哈 啊啊啊～</button>
+        <button class="candy-btn" data-sound="yawn24">哈ㄚㄚㄚOK</button>
+        <button class="candy-btn" data-sound="yawn25">哈（抖音斜向下</button>
 
       </div>
 
