@@ -198,6 +198,8 @@
         transition-duration: 0.1s;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       }
+
+
     </style>
 </head>
 <body>
@@ -673,11 +675,13 @@
   </script>
     <button id="random-play-btn" class="fab" onclick="playRandomSound()" aria-label="Play Random Sound">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon">
-        <polyline points="16 3 21 3 21 8"></polyline>
-        <line x1="4" y1="20" x2="21" y2="3"></line>
-        <polyline points="16 17 21 17 21 22"></polyline>
-        <line x1="4" y1="4" x2="11" y2="11"></line>
+        <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+        <circle cx="8" cy="8" r="1.5"></circle>
+        <circle cx="16" cy="16" r="1.5"></circle>
+        <circle cx="8" cy="16" r="1.5"></circle>
+        <circle cx="16" cy="8" r="1.5"></circle>
       </svg>
     </button>
+
   </body>
 </html>
