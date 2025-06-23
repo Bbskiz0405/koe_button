@@ -2,7 +2,10 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1e1e3f" />
   <title>心咲koe哈欠按鈕</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
@@ -447,6 +450,36 @@
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 6px 24px rgba(161, 196, 253, 0.3);
 }
+
+    /* ===== Responsive Design for Mobile ===== */
+    @media (max-width: 768px) {
+      .main-card {
+        padding: 16px 8px;
+      }
+
+      .glass-card {
+        padding: 16px;
+      }
+
+      .button-container {
+        gap: 8px;
+        justify-content: center; /* Center buttons on mobile */
+      }
+
+      .candy-btn {
+        font-size: 0.9rem;
+        padding: 0.6em 1.2em;
+        margin: 4px 2px;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+    }
 </style>
 </head>
 <body>
@@ -816,11 +849,16 @@
 
     // 設置按鈕點擊事件
     function setupButtons() {
-      const buttons = document.querySelectorAll('.yawn-button');
+      // 同時支援 .yawn-button 和 .candy-btn 類別的按鈕
+      const buttons = document.querySelectorAll('.yawn-button, .candy-btn');
       buttons.forEach(button => {
         button.addEventListener('click', function() {
           const soundName = this.dataset.sound;
-          playSound(soundName, this);
+          if (soundName) {
+            playSound(soundName, this);
+          } else {
+            console.warn('按鈕缺少 data-sound 屬性:', this);
+          }
         });
       });
     }
