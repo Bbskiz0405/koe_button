@@ -134,7 +134,29 @@
       .button-container { gap: 10px; }
       .candy-btn { font-size: 0.9rem; padding: 0.6em 1.2em; }
     }
-  </style>
+        .fab {
+        position: fixed;
+        width: 60px;
+        height: 60px;
+        bottom: 30px;
+        right: 30px;
+        background-color: #ff4081;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 30px;
+        line-height: 60px;
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        border: none;
+        cursor: pointer;
+        z-index: 1000;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .fab:hover {
+        transform: scale(1.1);
+      }
+    </style>
 </head>
 <body>
   
@@ -510,7 +532,6 @@
 
     // 設置按鈕點擊事件
     function setupButtons() {
-      // 同時支援 .yawn-button 和 .candy-btn 類別的按鈕
       const buttons = document.querySelectorAll('.yawn-button, .candy-btn');
       buttons.forEach(button => {
         button.addEventListener('click', function() {
@@ -524,6 +545,17 @@
       });
     }
 
+    function playRandomSound() {
+        const soundKeys = Object.keys(soundPaths);
+        const randomIndex = Math.floor(Math.random() * soundKeys.length);
+        const randomSoundName = soundKeys[randomIndex];
+        const button = document.querySelector(`[data-sound='${randomSoundName}']`);
+        if (button) {
+            playSound(randomSoundName, button);
+        } else {
+            console.error('找不到對應的隨機音效按鈕:', randomSoundName);
+        }
+    }
     // 設置側邊欄行為
     function setupSideMenu() {
       const menuToggle = document.getElementById('menuToggle');
@@ -595,8 +627,10 @@
 
   <script>
     function addDebugButton() {
-      // Add your code here
+      setupButtons();
+      setupSideMenu();
     }
   </script>
-</body>
+    <button id="random-play-btn" class="fab" onclick="playRandomSound()">🎲</button>
+  </body>
 </html>
