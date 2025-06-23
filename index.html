@@ -463,70 +463,68 @@
 
     // 播放音頻
     function playSound(soundName, button) {
-      // 檢查音頻是否存在
-      if (!audioFiles[soundName]) {
-        console.error(`音頻 ${soundName} 未找到`);
-        alert('抱歉，這個音頻檔案無法播放。');
-        return;
-      }
-      
-      // 停止當前音頻並移除所有按鈕的 'playing' class
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
-      document.querySelectorAll('.candy-btn.playing').forEach(btn => {
-        btn.classList.remove('playing');
-      });
+      try {
+        // 檢查音頻是否存在
+        if (!audioFiles[soundName]) {
+          console.error(`音頻 ${soundName} 未找到`);
+          alert('抱歉，這個音頻檔案無法播放。');
+          return;
+        }
+        
+        // 停止當前音頻並移除所有按鈕的 'playing' class
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+        }
+        document.querySelectorAll('.candy-btn.playing').forEach(btn => {
+          btn.classList.remove('playing');
+        });
 
-      // 播放新的音頻
-      const audio = audioFiles[soundName];
-      audio.currentTime = 0;
-      currentAudio = audio;
-      currentButton = button;
+        // 播放新的音頻
+        const audio = audioFiles[soundName];
+        audio.currentTime = 0;
+        currentAudio = audio;
+        currentButton = button;
 
-      // 為當前按鈕加上 'playing' class
-      button.classList.add('playing');
-      
-      // 設置音頻結束後的事件
-      audio.onended = () => {
-        button.classList.remove('playing');
-        document.getElementById('visualizer').classList.remove('active');
-        currentAudio = null;
-        currentButton = null;
-      };
+        // 為當前按鈕加上 'playing' class
+        button.classList.add('playing');
+        
+        // 設置音頻結束後的事件
+        audio.onended = () => {
+          button.classList.remove('playing');
+          if (document.getElementById('visualizer')) {
+            document.getElementById('visualizer').classList.remove('active');
+          }
+          currentAudio = null;
+          currentButton = null;
+        };
 
-      // 顯示調試信息
-      console.log(`嘗試播放音頻: ${soundPaths[soundName]}`);
-      console.log('音頻元素:', audio);
-      console.log('音頻狀態:', {
-        ready: audio.readyState,
-        networkState: audio.networkState,
-        error: audio.error
-      });
-      
-      // 播放音頻
-      const playPromise = audio.play();
-      
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            console.log('音頻播放成功!');
-            // 添加播放中的視覺效果
-            button.classList.add('playing');
-            currentAudio = audio;
-            currentButton = button;
-            
-            // 啟動可視化效果
-            document.getElementById('visualizer').classList.add('active');
-            animateVisualizer();
-          })
-          .catch(error => {
-            console.error('播放失敗:', error);
-            alert(`播放音頻時出錯: ${error.message}。可能是瀏覽器限制自動播放功能，或者音頻檔案有問題。`);
-          });
-      } else {
-        console.warn('瀏覽器不支持音頻播放承諾API');
+        // 嘗試播放音頻
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('音頻播放成功:', soundName);
+              // 啟動可視化效果
+              if (document.getElementById('visualizer')) {
+                document.getElementById('visualizer').classList.add('active');
+                animateVisualizer();
+              }
+            })
+            .catch(error => {
+              console.error('播放失敗:', error);
+              button.classList.remove('playing');
+              // 顯示用戶友好的提示
+              if (error.name === 'NotAllowedError' || 
+                  error.name === 'NotSupportedError') {
+                alert('請先點擊頁面任意位置，然後再試一次。\n如果問題持續，請檢查瀏覽器是否允許音頻播放。');
+              }
+            });
+        }
+      } catch (error) {
+        console.error('播放音頻時出錯:', error);
+        if (button) button.classList.remove('playing');
       }
     }
 
