@@ -297,228 +297,72 @@
 
   <!-- Script -->
   <script>
-        // 音頻路徑映射 - 使用CDN作為備選方案
+    // ====================================================================
+    //                          Configuration
+    // ====================================================================
     const soundPaths = {
-      yawn1: '/sounds/5_10_1_45.mp3',// 主要路徑
-      yawn2: '/sounds/5_10_2_05.mp3',
-      yawn3: '/sounds/5_10_2_30.mp3',
-      yawn4: '/sounds/5_10_2_37.mp3',
-      yawn5: '/sounds/5_10_2_40.mp3',
-      yawn6: '/sounds/5_10_2_51.mp3',
-      yawn7: '/sounds/5_10_2_40_2.mp3',
-      yawn8: '/sounds/5_10_2_51_2.mp3',
-      yawn9: '/sounds/5_10_3_06.mp3',
-      yawn10: '/sounds/5_10_3_08.mp3',
-      yawn11: '/sounds/5_17_0_20.mp3',
-      yawn12: '/sounds/5_17_0_30.mp3',
-      yawn13: '/sounds/5_17_1_00.mp3',
-      yawn14: '/sounds/5_17_1_14.mp3',
-      yawn15: '/sounds/5_17_1_23.mp3',
-      yawn16: '/sounds/5_17_1_24.mp3',
-      yawn17: '/sounds/5_17_1_34.mp3',
-      yawn18: '/sounds/5_17_1_49.mp3',
-      yawn19: '/sounds/5_17_1_58.mp3',
-      yawn20: '/sounds/5_17_2_22.mp3',
-      yawn21: '/sounds/5_17_2_23.mp3',
-      yawn22: '/sounds/5_17_2_25.mp3',
-      yawn23: '/sounds/5_17_2_59.mp3',
-      yawn24: '/sounds/5_17_3_21.mp3',
-      yawn25: '/sounds/6_21_0_07.mp3',
-      yawn26: '/sounds/6_21_0_10.mp3',
-      yawn27: '/sounds/6_21_0_13.mp3',
-
+      yawn1: 'sounds/5_10_1_45.mp3',
+      yawn2: 'sounds/5_10_2_05.mp3',
+      yawn3: 'sounds/5_10_2_30.mp3',
+      yawn4: 'sounds/5_10_2_37.mp3',
+      yawn5: 'sounds/5_10_2_40.mp3',
+      yawn6: 'sounds/5_10_2_51.mp3',
+      yawn7: 'sounds/5_10_2_40_2.mp3',
+      yawn8: 'sounds/5_10_2_51_2.mp3',
+      yawn9: 'sounds/5_10_3_06.mp3',
+      yawn10: 'sounds/5_10_3_08.mp3',
+      yawn11: 'sounds/5_17_0_20.mp3',
+      yawn12: 'sounds/5_17_0_30.mp3',
+      yawn13: 'sounds/5_17_1_00.mp3',
+      yawn14: 'sounds/5_17_1_14.mp3',
+      yawn15: 'sounds/5_17_1_23.mp3',
+      yawn16: 'sounds/5_17_1_24.mp3',
+      yawn17: 'sounds/5_17_1_34.mp3',
+      yawn18: 'sounds/5_17_1_49.mp3',
+      yawn19: 'sounds/5_17_1_58.mp3',
+      yawn20: 'sounds/5_17_2_22.mp3',
+      yawn21: 'sounds/5_17_2_23.mp3',
+      yawn22: 'sounds/5_17_2_25.mp3',
+      yawn23: 'sounds/5_17_2_59.mp3',
+      yawn24: 'sounds/5_17_3_21.mp3',
+      yawn25: 'sounds/6_21_0_07.mp3',
+      yawn26: 'sounds/6_21_0_10.mp3',
+      yawn27: 'sounds/6_21_0_13.mp3',
     };
-    
-    
-    // 如果您的網站在子目錄中，請使用:
-    // const repoName = 'your-repo-name'; // 替換為您的儲存庫名稱
-    // const basePath = `/${repoName}`;
-
-    // 預加載音頻檔案
     const audioFiles = {};
     let currentAudio = null;
     let currentButton = null;
 
-    // 添加調試按鈕
-    document.addEventListener('DOMContentLoaded', () => {
-      // 原有的代碼保持不變
-      setTimeout(() => {
-        document.getElementById('loaderContainer').style.opacity = '0';
-        setTimeout(() => {
-          document.getElementById('loaderContainer').style.display = 'none';
-        }, 500);
-      }, 1000);
+    // ====================================================================
+    //                          Function Definitions
+    // ====================================================================
 
-      // 預加載音頻
-      preloadAudio();
-
-      // 設置按鈕點擊事件
-      setupButtons();
-
-      // 設置側邊欄
-      setupSideMenu();
-      
-      // 添加調試按鈕
-      addDebugButton();
-    });
-    
-    // 添加調試功能
-    function addDebugButton() {
-      const footer = document.querySelector('.footer');
-      const debugBtn = document.createElement('button');
-      debugBtn.textContent = '檢查音訊狀態';
-      debugBtn.style.padding = '8px';
-      debugBtn.style.margin = '10px auto';
-      debugBtn.style.background = 'rgba(255,255,255,0.1)';
-      debugBtn.style.color = 'white';
-      debugBtn.style.border = 'none';
-      debugBtn.style.borderRadius = '4px';
-      debugBtn.style.cursor = 'pointer';
-      debugBtn.style.display = 'block';
-      
-      debugBtn.onclick = function() {
-        checkAudioStatus();
-      };
-      
-      footer.insertBefore(debugBtn, footer.firstChild);
-    }
-    
-    // 檢查所有音訊的狀態
-    function checkAudioStatus() {
-      let statusReport = "音訊檔案狀態報告:\n\n";
-      
-      Object.keys(audioFiles).forEach(key => {
-        const audio = audioFiles[key];
-        const path = soundPaths[key];
-        
-        statusReport += `${key}:\n`;
-        statusReport += `- 路徑: ${path}\n`;
-        statusReport += `- 就緒狀態: ${getReadyStateText(audio.readyState)}\n`;
-        statusReport += `- 網路狀態: ${getNetworkStateText(audio.networkState)}\n`;
-        statusReport += `- 錯誤: ${audio.error ? audio.error.code : '無'}\n\n`;
-      });
-      
-      alert(statusReport);
-      console.log(statusReport);
-      
-      // 測試簡單音訊播放
-      try {
-        const testAudio = new Audio();
-        testAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-        testAudio.play().then(() => {
-          console.log('瀏覽器允許音訊播放');
-          alert('瀏覽器允許音訊播放');
-        }).catch(e => {
-          console.error('瀏覽器阻止音訊播放', e);
-          alert('瀏覽器阻止音訊播放: ' + e.message);
-        });
-      } catch (e) {
-        console.error('測試音訊時出錯', e);
-      }
-    }
-    
-    // 獲取就緒狀態文本說明
-    function getReadyStateText(state) {
-      const states = [
-        'HAVE_NOTHING: 沒有資訊',
-        'HAVE_METADATA: 有元數據',
-        'HAVE_CURRENT_DATA: 有當前數據',
-        'HAVE_FUTURE_DATA: 有未來數據',
-        'HAVE_ENOUGH_DATA: 有足夠數據'
-      ];
-      return states[state] || '未知';
-    }
-    
-    // 獲取網路狀態文本說明
-    function getNetworkStateText(state) {
-      const states = [
-        'NETWORK_EMPTY: 未初始化',
-        'NETWORK_IDLE: 閒置',
-        'NETWORK_LOADING: 加載中',
-        'NETWORK_NO_SOURCE: 無可用來源'
-      ];
-      return states[state] || '未知';
-    }
-
-        // 預加載音頻檔案
     function preloadAudio() {
-      // 檢測是否在GitHub Pages上運行，並調整路徑
-      const isGitHubPages = window.location.hostname.includes('github.io');
-      const repoName = window.location.pathname.split('/')[1]; // 獲取儲存庫名稱
-      const statusDiv = document.getElementById('audioStatus');
-      
-      // 設置初始狀態信息
-      statusDiv.textContent = "正在嘗試載入音訊檔案...";
-      
+      console.log("Initializing audio preloading...");
       Object.keys(soundPaths).forEach(key => {
-        try {
-          // 調整路徑以適應GitHub Pages
-          let audioPath = soundPaths[key];
-          if (isGitHubPages && repoName) {
-            // 如果是在GitHub Pages且不是個人頁面的根目錄
-            audioPath = `/${repoName}${audioPath}`;
-          }
-          
-          console.log(`嘗試加載音頻: ${audioPath}`);
-          audioFiles[key] = new Audio(audioPath);
-          audioFiles[key].preload = 'auto';
-          
-          // 添加錯誤處理
-          audioFiles[key].onerror = function() {
-            console.warn(`無法加載音頻: ${audioPath}，嘗試備用路徑`);
-            
-            // 嘗試使用備用路徑
-            if (fallbackPaths && fallbackPaths[key]) {
-              console.log(`嘗試使用備用路徑: ${fallbackPaths[key]}`);
-              audioFiles[key] = new Audio(fallbackPaths[key]);
-              
-              // 為備用路徑添加事件處理
-              audioFiles[key].onerror = function() {
-                console.error(`備用路徑也無法加載: ${fallbackPaths[key]}`);
-                const button = document.querySelector(`.yawn-button[data-sound="${key}"]`);
-                if (button) {
-                  button.disabled = true;
-                  button.style.opacity = "0.5";
-                  button.title = "音頻檔案不可用";
-                }
-                
-                statusDiv.textContent += `\n無法載入音訊檔案 ${key}`;
-              };
-            } else {
-              // 沒有備用路徑，禁用按鈕
-              const button = document.querySelector(`.yawn-button[data-sound="${key}"]`);
-              if (button) {
+        const path = soundPaths[key];
+        audioFiles[key] = new Audio(path);
+        audioFiles[key].preload = 'auto';
+        audioFiles[key].onerror = () => {
+            console.error(`Error loading audio: ${key} at ${path}`);
+            const button = document.querySelector(`.candy-btn[data-sound="${key}"]`);
+            if (button) {
                 button.disabled = true;
-                button.style.opacity = "0.5";
-                button.title = "音頻檔案不可用";
-              }
+                button.title = "音檔載入失敗";
+                button.style.opacity = '0.5';
             }
-          };
-          
-          // 添加測試事件
-          audioFiles[key].addEventListener('canplaythrough', function() {
-            console.log(`音頻已成功載入: ${audioPath}`);
-            statusDiv.textContent = `音訊檔案已成功載入，可以點擊播放`;
-          });
-          
-        } catch (error) {
-          console.error(`加載音頻時出錯: ${soundPaths[key]}`, error);
-          statusDiv.textContent += `\n載入音訊檔案時出錯: ${error.message}`;
-        }
+        };
       });
     }
 
-    // 播放音頻
     function playSound(soundName, button) {
       try {
-        // 檢查音頻是否存在
-        if (!audioFiles[soundName]) {
-          console.error(`音頻 ${soundName} 未找到`);
+        if (!audioFiles[soundName] || audioFiles[soundName].error) {
+          console.error(`Audio not available: ${soundName}`);
           alert('抱歉，這個音頻檔案無法播放。');
           return;
         }
         
-        // 停止當前音頻並移除所有按鈕的 'playing' class
         if (currentAudio) {
           currentAudio.pause();
           currentAudio.currentTime = 0;
@@ -527,132 +371,104 @@
           btn.classList.remove('playing');
         });
 
-        // 播放新的音頻
         const audio = audioFiles[soundName];
         audio.currentTime = 0;
         currentAudio = audio;
         currentButton = button;
-
-        // 為當前按鈕加上 'playing' class
         button.classList.add('playing');
         
-        // 設置音頻結束後的事件
         audio.onended = () => {
           button.classList.remove('playing');
-          if (document.getElementById('visualizer')) {
-            document.getElementById('visualizer').classList.remove('active');
-          }
+          const visualizer = document.getElementById('visualizer');
+          if (visualizer) visualizer.classList.remove('active');
           currentAudio = null;
           currentButton = null;
         };
 
-        // 嘗試播放音頻
         const playPromise = audio.play();
-        
         if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              console.log('音頻播放成功:', soundName);
-              // 啟動可視化效果
-              if (document.getElementById('visualizer')) {
-                document.getElementById('visualizer').classList.add('active');
+          playPromise.then(() => {
+              const visualizer = document.getElementById('visualizer');
+              if (visualizer) {
+                visualizer.classList.add('active');
                 animateVisualizer();
               }
-            })
-            .catch(error => {
-              console.error('播放失敗:', error);
+            }).catch(error => {
+              console.error('Playback failed:', error);
               button.classList.remove('playing');
-              // 顯示用戶友好的提示
-              if (error.name === 'NotAllowedError' || 
-                  error.name === 'NotSupportedError') {
-                alert('請先點擊頁面任意位置，然後再試一次。\n如果問題持續，請檢查瀏覽器是否允許音頻播放。');
+              if (error.name === 'NotAllowedError') {
+                alert('瀏覽器限制了自動播放，請先點擊頁面任意處再試。');
               }
             });
         }
       } catch (error) {
-        console.error('播放音頻時出錯:', error);
+        console.error('Error in playSound:', error);
         if (button) button.classList.remove('playing');
       }
     }
 
-    // 設置按鈕點擊事件
     function setupButtons() {
-      const buttons = document.querySelectorAll('.yawn-button, .candy-btn');
+      console.log("Setting up buttons...");
+      const buttons = document.querySelectorAll('.candy-btn[data-sound]');
       buttons.forEach(button => {
-        button.addEventListener('click', function() {
-          const soundName = this.dataset.sound;
-          if (soundName) {
-            playSound(soundName, this);
-          } else {
-            console.warn('按鈕缺少 data-sound 屬性:', this);
-          }
-        });
+        const soundName = button.dataset.sound;
+        if (soundName) {
+            button.addEventListener('click', function() {
+                playSound(soundName, this);
+            });
+        }
       });
     }
 
     function playRandomSound() {
         const soundKeys = Object.keys(soundPaths);
-        const randomIndex = Math.floor(Math.random() * soundKeys.length);
-        const randomSoundName = soundKeys[randomIndex];
-        const button = document.querySelector(`[data-sound='${randomSoundName}']`);
-        if (button) {
-            playSound(randomSoundName, button);
+        const randomKey = soundKeys[Math.floor(Math.random() * soundKeys.length)];
+        const randomButton = document.querySelector(`.candy-btn[data-sound='${randomKey}']`);
+        if (randomButton) {
+            playSound(randomKey, randomButton);
         } else {
-            console.error('找不到對應的隨機音效按鈕:', randomSoundName);
+            console.error(`Could not find button for random sound: ${randomKey}`);
         }
     }
-    // 設置側邊欄行為
+
     function setupSideMenu() {
+      console.log("Setting up side menu...");
       const menuToggle = document.getElementById('menuToggle');
       const sideMenu = document.getElementById('sideMenu');
 
-      menuToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sideMenu.classList.toggle('active');
-      });
-
-      // 點擊其他區域關閉選單
-      document.addEventListener('click', (e) => {
-        if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-          sideMenu.classList.remove('active');
-        }
-      });
-
-      // 點擊選單鏈接關閉選單
-      const menuLinks = sideMenu.querySelectorAll('a');
-      menuLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          sideMenu.classList.remove('active');
+      if (menuToggle && sideMenu) {
+        menuToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sideMenu.classList.toggle('active');
         });
-      });
+
+        document.addEventListener('click', (e) => {
+          if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            sideMenu.classList.remove('active');
+          }
+        });
+      } else {
+        console.error("Side menu or toggle button not found.");
+      }
     }
 
-    // 音頻可視化器動畫
     function animateVisualizer() {
       if (!currentAudio) return;
-
       const visualizerBars = document.querySelectorAll('.visualizer-bar');
-      
-      function updateBars() {
+      const updateBars = () => {
         if (!currentAudio || currentAudio.paused) {
-          visualizerBars.forEach(bar => {
-            bar.style.height = '10px';
-          });
+          visualizerBars.forEach(bar => { bar.style.height = '10px'; });
           return;
         }
-
         visualizerBars.forEach(bar => {
-          const height = Math.floor(Math.random() * 40) + 10;
+          const height = Math.floor(Math.random() * 20) + 5;
           bar.style.height = `${height}px`;
         });
-
         requestAnimationFrame(updateBars);
-      }
-
+      };
       updateBars();
     }
 
-    // 關於網站彈窗相關函數
     function showAboutModal() {
       document.getElementById('aboutModal').style.display = 'block';
     }
@@ -661,20 +477,36 @@
       document.getElementById('aboutModal').style.display = 'none';
     }
 
-    // 當點擊彈窗外部時關閉彈窗
+    // ====================================================================
+    //                          Initialization
+    // ====================================================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("DOM fully loaded. Initializing application.");
+      try {
+        preloadAudio();
+        setupButtons();
+        setupSideMenu();
+      } catch (error) {
+        console.error("Initialization script failed:", error);
+      } finally {
+        setTimeout(() => {
+          const loader = document.getElementById('loaderContainer');
+          if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 500);
+          }
+        }, 500);
+      }
+    });
+
+    // Global handlers for inline onclick attributes
     window.onclick = function(event) {
-      var modal = document.getElementById('aboutModal');
-      if (event.target == modal) {
+      const modal = document.getElementById('aboutModal');
+      if (modal && event.target == modal) {
         modal.style.display = 'none';
       }
-    }
-  </script>
-
-  <script>
-    function addDebugButton() {
-      setupButtons();
-      setupSideMenu();
-    }
+    };
   </script>
     <button id="random-play-btn" class="fab" onclick="playRandomSound()" aria-label="Play Random Sound">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon">
