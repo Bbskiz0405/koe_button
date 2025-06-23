@@ -173,29 +173,33 @@
 
     /* ===== Main Content ===== */
     .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: calc(var(--header-height) + 40px) 16px 40px;
-      width: 100%;
-    }
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: calc(var(--header-height) + 40px) 0 40px 0;
+  width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
+}
 
     /* ===== Main Card ===== */
     .main-card {
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 40px 32px;
-      width: 95%;
-      max-width: 800px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      text-align: center;
-      transition: transform 0.3s ease;
-    }
+  background: var(--card-bg);
+  border-radius: 24px;
+  padding: 40px 32px;
+  width: 98vw;
+  max-width: 1400px;
+  min-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  text-align: center;
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+}
 
     .card-title {
       font-size: 28px;
@@ -245,11 +249,15 @@
     }
 
     .button-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 20px;
-      justify-content: center;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px 32px;
+  justify-content: stretch;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 8px 8px 8px;
+  box-sizing: border-box;
+}
 
     .yawn-button {
       backdrop-filter: blur(8px);
