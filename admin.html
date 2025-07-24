@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>管理後台 - 心咲koe哈欠按鈕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #a18cd1;
+      --secondary-color: #fbc2eb;
+      --dark-bg: #1e1e3f;
+      --darker-bg: #15152c;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --text-color: #f0f0f0;
+      --success-color: #4caf50;
+      --error-color: #f44336;
+      --warning-color: #ff9800;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
+      color: var(--text-color);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px 0;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .header .subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+    }
+
+    .admin-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.2);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-input-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .file-input-display:hover {
+      border-color: var(--primary-color);
+      background: rgba(161, 140, 209, 0.1);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(161, 140, 209, 0.3);
+    }
+
+    .btn-danger {
+      background: var(--error-color);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .sounds-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .sounds-table th,
+    .sounds-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sounds-table th {
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .sounds-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+
+    .status-success {
+      background: rgba(76, 175, 80, 0.2);
+      color: var(--success-color);
+      border: 1px solid var(--success-color);
+    }
+
+    .status-error {
+      background: rgba(244, 67, 54, 0.2);
+      color: var(--error-color);
+      border: 1px solid var(--error-color);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 音量滑桿樣式 */
+    #volumeSlider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: linear-gradient(to right, #f44336 0%, #ff9800 25%, #4caf50 50%, #ff9800 75%, #f44336 100%);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #volumeSlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(161, 140, 209, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    #volumeSlider::-webkit-slider-thumb:hover {
+      background: var(--secondary-color);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(161, 140, 209, 0.6);
+    }
+
+    #volumeSlider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(161, 140, 209, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    #volumeSlider::-moz-range-thumb:hover {
+      background: var(--secondary-color);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(161, 140, 209, 0.6);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .admin-card {
+        padding: 20px;
+      }
+      
+      .sounds-table {
+        font-size: 0.9rem;
+      }
+      
+      .sounds-table th,
+      .sounds-table td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>管理後台</h1>
+      <p class="subtitle">心咲koe哈欠按鈕音檔管理系統</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+        <a href="index.html" class="back-link">
+          ← 返回主頁
+        </a>
+        <div id="authStatus" style="display: flex; align-items: center; gap: 10px;">
+          <!-- 登入狀態顯示區域 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 登入表單 -->
+    <div id="loginSection" class="admin-card" style="display: none;">
+      <h2 class="card-title">
+        🔐 管理員登入
+      </h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email</label>
+          <input 
+            type="email" 
+            id="loginEmail" 
+            class="form-input" 
+            placeholder="請輸入管理員 Email" 
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">密碼</label>
+          <input 
+            type="password" 
+            id="loginPassword" 
+            class="form-input" 
+            placeholder="請輸入密碼" 
+            required
+          />
+        </div>
+        
+        <div id="loginMessage"></div>
+        
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          <span id="loginBtnText">登入</span>
+          <div id="loginLoader" class="loading" style="display: none;"></div>
+        </button>
+      </form>
+    </div>
+
+    <!-- 管理功能區域 (需要登入) -->
+    <div id="adminSection" style="display: none;">
+    
+    <!-- 上傳音檔區域 -->
+    <div class="admin-card">
+      <h2 class="card-title">
+        🎵 上傳新音檔
+      </h2>
+      <form id="uploadForm">
+        <div class="form-group">
+          <label class="form-label" for="soundDescription">音檔描述 (按鈕文字)</label>
+          <input 
+            type="text" 
+            id="soundDescription" 
+            class="form-input" 
+            placeholder="例如：哈姆、哈嗨ㄏㄚˋ" 
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">錄製時間 (直播日期與時間)</label>
+          
+          <!-- 日期輸入 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; display: block;">直播日期</label>
+            <input 
+              type="date" 
+              id="recordingDate" 
+              class="form-input" 
+              required
+            />
+          </div>
+          
+          <!-- 時間輸入 -->
+          <div>
+            <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; display: block;">直播時間標記</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input 
+                type="text" 
+                id="recordingTime" 
+                class="form-input" 
+                placeholder="例如：2_30 (2小時30分)" 
+                pattern="[0-9]+_[0-9]+"
+                title="格式：小時_分鐘，例如 2_30"
+                required
+                style="flex: 1;"
+              />
+              <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem; white-space: nowrap;">
+                格式：小時_分鐘
+              </span>
+            </div>
+          </div>
+          
+          <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 8px;">
+            💡 例如：2024年5月10日直播第2小時30分 → 日期選 "2024-05-10"，時間輸入 "2_30"
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">音檔檔案</label>
+          <div class="file-input-wrapper">
+            <input 
+              type="file" 
+              id="audioFile" 
+              class="file-input" 
+              accept=".mp3,.wav,.m4a" 
+              required
+            />
+            <div class="file-input-display">
+              <span id="fileInputText">點擊選擇音檔檔案 (支援 MP3, WAV, M4A)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 音量分析和調整區域 -->
+        <div id="volumeControlSection" class="form-group" style="display: none;">
+          <label class="form-label">🔊 音量分析與調整</label>
+          <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            
+            <!-- 音量分析結果 -->
+            <div id="volumeAnalysis" style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-weight: 500;">當前音量:</span>
+                <span id="currentVolumeDisplay" style="color: var(--primary-color); font-weight: 600;">-</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span style="font-weight: 500;">建議調整:</span>
+                <span id="volumeRecommendation" style="color: var(--secondary-color); font-weight: 600;">-</span>
+              </div>
+            </div>
+
+            <!-- 音量調整滑桿 -->
+            <div style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-weight: 500;">音量調整:</label>
+                <span id="volumeAdjustmentDisplay" style="color: var(--text-color); font-weight: 600;">0 dB</span>
+              </div>
+              <div style="position: relative;">
+                <input 
+                  type="range" 
+                  id="volumeSlider" 
+                  min="-20" 
+                  max="20" 
+                  step="0.5" 
+                  value="0" 
+                  style="width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; outline: none; -webkit-appearance: none;"
+                />
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 5px;">
+                  <span>-20dB</span>
+                  <span>0dB</span>
+                  <span>+20dB</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 預覽控制 -->
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" id="previewOriginalBtn" class="btn btn-secondary" style="flex: 1;">
+                🎵 播放原音檔
+              </button>
+              <button type="button" id="previewAdjustedBtn" class="btn btn-secondary" style="flex: 1;">
+                🔊 播放調整後
+              </button>
+              <button type="button" id="autoNormalizeBtn" class="btn" style="background: var(--warning-color); color: white;">
+                ⚡ 自動標準化
+              </button>
+            </div>
+
+            <!-- 音量可視化 -->
+            <div id="volumeVisualization" style="margin-top: 15px; height: 60px; background: rgba(0,0,0,0.3); border-radius: 6px; position: relative; overflow: hidden;">
+              <div style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); font-size: 0.8rem; color: rgba(255,255,255,0.6);">
+                音量波形
+              </div>
+              <canvas id="volumeCanvas" width="400" height="60" style="width: 100%; height: 100%;"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <div id="statusMessage"></div>
+        
+        <button type="submit" class="btn btn-primary" id="uploadBtn">
+          <span id="uploadBtnText">上傳音檔</span>
+          <div id="uploadLoader" class="loading" style="display: none;"></div>
+        </button>
+      </form>
+    </div>
+
+    <!-- 音檔列表區域 -->
+    <div class="admin-card">
+      <h2 class="card-title">
+        📋 已上傳音檔列表
+      </h2>
+      <!-- 搜尋和控制區域 -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <!-- 搜尋框 -->
+          <div style="flex: 1; min-width: 200px;">
+            <input 
+              type="text" 
+              id="searchInput" 
+              class="form-input" 
+              placeholder="搜尋描述或檔案名稱..." 
+              style="margin: 0;"
+            />
+          </div>
+          
+          <!-- 排序選擇 -->
+          <select id="sortSelect" class="form-input" style="width: auto; margin: 0;">
+            <option value="newest">最新上傳</option>
+            <option value="oldest">最舊上傳</option>
+            <option value="name">名稱排序</option>
+            <option value="date">日期排序</option>
+          </select>
+          
+          <!-- 每頁數量 -->
+          <select id="pageSizeSelect" class="form-input" style="width: auto; margin: 0;">
+            <option value="10">10筆/頁</option>
+            <option value="25">25筆/頁</option>
+            <option value="50">50筆/頁</option>
+            <option value="100">100筆/頁</option>
+            <option value="all">顯示全部</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" id="refreshBtn">刷新列表</button>
+          <button class="btn" id="checkConsistencyBtn" style="background: var(--warning-color); color: white;">
+            🔍 檢查數據一致性
+          </button>
+          <button class="btn" id="exportBtn" style="background: var(--success-color); color: white;">
+            📤 匯出清單
+          </button>
+          <button class="btn" id="batchNormalizeBtn" style="background: var(--warning-color); color: white;">
+            🔊 批量音量標準化
+          </button>
+        </div>
+      </div>
+      
+      <!-- 統計資訊 -->
+      <div id="statsInfo" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+          <span id="totalCount">總計：- 個音檔</span>
+          <span id="filteredCount"></span>
+          <span id="currentPage"></span>
+        </div>
+      </div>
+      <div id="soundsTableContainer">
+        <div style="text-align: center; padding: 20px;">
+          <div class="loading"></div>
+          <p style="margin-top: 10px;">載入中...</p>
+        </div>
+      </div>
+      
+      <!-- 分頁控制 -->
+      <div id="paginationContainer" style="display: none; text-align: center; margin-top: 20px;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button id="firstPageBtn" class="btn btn-secondary" style="padding: 8px 12px;">⏮️ 首頁</button>
+          <button id="prevPageBtn" class="btn btn-secondary" style="padding: 8px 12px;">⬅️ 上一頁</button>
+          <span id="pageInfo" style="color: var(--text-color); font-weight: 600; margin: 0 15px;">第 1 頁，共 1 頁</span>
+          <button id="nextPageBtn" class="btn btn-secondary" style="padding: 8px 12px;">下一頁 ➡️</button>
+          <button id="lastPageBtn" class="btn btn-secondary" style="padding: 8px 12px;">末頁 ⏭️</button>
+        </div>
+      </div>
+    </div>
+    
+    </div> <!-- 關閉 adminSection -->
+  </div>
+
+  <!-- Firebase 配置 -->
+  <script type="module" src="firebase-config.js"></script>
+  
+  <script type="module">
+    // 管理後台 JavaScript
+    let isUploading = false;
+    
+    // 音量處理相關變數
+    let audioContext = null;
+    let originalAudioBuffer = null;
+    let adjustedAudioBuffer = null;
+    let currentVolumeLevel = 0;
+    let volumeAdjustment = 0;
+    
+    // 列表管理相關變數
+    let allSounds = [];          // 所有音檔資料
+    let filteredSounds = [];     // 篩選後的音檔資料
+    let currentPage = 1;         // 當前頁數
+    let pageSize = 25;           // 每頁顯示數量
+    let sortBy = 'newest';       // 排序方式
+    let searchTerm = '';         // 搜尋關鍵字
+
+    // DOM 元素
+    const uploadForm = document.getElementById('uploadForm');
+    const audioFileInput = document.getElementById('audioFile');
+    const fileInputText = document.getElementById('fileInputText');
+    const statusMessage = document.getElementById('statusMessage');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadBtnText = document.getElementById('uploadBtnText');
+    const uploadLoader = document.getElementById('uploadLoader');
+    const soundsTableContainer = document.getElementById('soundsTableContainer');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const checkConsistencyBtn = document.getElementById('checkConsistencyBtn');
+    
+    // 搜尋和分頁 DOM 元素
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    const exportBtn = document.getElementById('exportBtn');
+    const batchNormalizeBtn = document.getElementById('batchNormalizeBtn');
+    const totalCount = document.getElementById('totalCount');
+    const filteredCount = document.getElementById('filteredCount');
+    const currentPageSpan = document.getElementById('currentPage');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const pageInfo = document.getElementById('pageInfo');
+    const firstPageBtn = document.getElementById('firstPageBtn');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const lastPageBtn = document.getElementById('lastPageBtn');
+    
+    // Authentication DOM 元素
+    const loginSection = document.getElementById('loginSection');
+    const adminSection = document.getElementById('adminSection');
+    const authStatus = document.getElementById('authStatus');
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginBtnText = document.getElementById('loginBtnText');
+    const loginLoader = document.getElementById('loginLoader');
+    const loginMessage = document.getElementById('loginMessage');
+    
+    // 音量控制 DOM 元素
+    const volumeControlSection = document.getElementById('volumeControlSection');
+    const currentVolumeDisplay = document.getElementById('currentVolumeDisplay');
+    const volumeRecommendation = document.getElementById('volumeRecommendation');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeAdjustmentDisplay = document.getElementById('volumeAdjustmentDisplay');
+    const previewOriginalBtn = document.getElementById('previewOriginalBtn');
+    const previewAdjustedBtn = document.getElementById('previewAdjustedBtn');
+    const autoNormalizeBtn = document.getElementById('autoNormalizeBtn');
+    const volumeCanvas = document.getElementById('volumeCanvas');
+
+    // ====================================================================
+    //                         Firebase Authentication 功能
+    // ====================================================================
+
+    let currentUser = null;
+
+    // 顯示登入狀態
+    function updateAuthStatus(user) {
+      if (user) {
+        // 已登入
+        currentUser = user;
+        loginSection.style.display = 'none';
+        adminSection.style.display = 'block';
+        
+        authStatus.innerHTML = `
+          <span style="color: var(--success-color); font-weight: 600;">
+            ✓ 已登入: ${user.email}
+          </span>
+          <button id="logoutBtn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
+            登出
+          </button>
+        `;
+        
+        // 綁定登出按鈕
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        
+        // 載入音檔列表
+        loadSoundsList();
+        
+      } else {
+        // 未登入
+        currentUser = null;
+        loginSection.style.display = 'block';
+        adminSection.style.display = 'none';
+        
+        authStatus.innerHTML = `
+          <span style="color: var(--error-color); font-weight: 600;">
+            ⚠ 需要登入才能管理音檔
+          </span>
+        `;
+      }
+    }
+
+    // 登入處理
+    async function handleLogin(email, password) {
+      try {
+        const userCredential = await window.firebase.signInWithEmailAndPassword(window.firebase.auth, email, password);
+        showLoginStatus('登入成功！', 'success');
+        return userCredential.user;
+      } catch (error) {
+        console.error('登入失敗:', error);
+        let errorMessage = '登入失敗';
+        
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = '找不到此帳號';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = '密碼錯誤';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Email 格式錯誤';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = '嘗試次數過多，請稍後再試';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        
+        showLoginStatus(errorMessage, 'error');
+        throw error;
+      }
+    }
+
+    // 登出處理
+    async function handleLogout() {
+      try {
+        await window.firebase.signOut(window.firebase.auth);
+        showLoginStatus('已登出', 'success');
+      } catch (error) {
+        console.error('登出失敗:', error);
+        showLoginStatus('登出失敗：' + error.message, 'error');
+      }
+    }
+
+    // 顯示登入狀態訊息
+    function showLoginStatus(message, type = 'success') {
+      loginMessage.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+      setTimeout(() => {
+        loginMessage.innerHTML = '';
+      }, 5000);
+    }
+
+    // 設定登入按鈕狀態
+    function setLoginState(loading) {
+      loginBtn.disabled = loading;
+      if (loading) {
+        loginBtnText.textContent = '登入中...';
+        loginLoader.style.display = 'inline-block';
+      } else {
+        loginBtnText.textContent = '登入';
+        loginLoader.style.display = 'none';
+      }
+    }
+
+    // ====================================================================
+    //                       Web Audio API 音量處理功能
+    // ====================================================================
+
+    // 初始化 Audio Context
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioContext;
+    }
+
+    // 分析音檔音量
+    async function analyzeAudioVolume(file) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        originalAudioBuffer = audioBuffer;
+
+        // 計算 RMS 音量
+        const channelData = audioBuffer.getChannelData(0);
+        let sum = 0;
+        let peak = 0;
+        
+        for (let i = 0; i < channelData.length; i++) {
+          const sample = Math.abs(channelData[i]);
+          sum += sample * sample;
+          if (sample > peak) peak = sample;
+        }
+        
+        const rms = Math.sqrt(sum / channelData.length);
+        const rmsDb = 20 * Math.log10(rms);
+        const peakDb = 20 * Math.log10(peak);
+        
+        currentVolumeLevel = rmsDb;
+        
+        // 更新顯示
+        updateVolumeDisplay(rmsDb, peakDb);
+        drawVolumeWaveform(channelData);
+        
+        return { rms: rmsDb, peak: peakDb };
+        
+      } catch (error) {
+        console.error('音量分析失敗:', error);
+        showStatus('音量分析失敗: ' + error.message, 'error');
+        throw error;
+      }
+    }
+
+    // 更新音量顯示
+    function updateVolumeDisplay(rmsDb, peakDb) {
+      currentVolumeDisplay.textContent = `${rmsDb.toFixed(1)} dB (峰值: ${peakDb.toFixed(1)} dB)`;
+      
+      // 計算建議調整值 (目標: -12dB RMS)
+      const targetDb = -12;
+      const recommendedAdjustment = targetDb - rmsDb;
+      
+      let recommendationText = '';
+      let recommendationColor = '';
+      
+      if (Math.abs(recommendedAdjustment) < 1) {
+        recommendationText = '音量適中 ✓';
+        recommendationColor = 'var(--success-color)';
+      } else if (recommendedAdjustment > 0) {
+        recommendationText = `建議提高 ${recommendedAdjustment.toFixed(1)} dB`;
+        recommendationColor = 'var(--warning-color)';
+      } else {
+        recommendationText = `建議降低 ${Math.abs(recommendedAdjustment).toFixed(1)} dB`;
+        recommendationColor = 'var(--error-color)';
+      }
+      
+      volumeRecommendation.textContent = recommendationText;
+      volumeRecommendation.style.color = recommendationColor;
+    }
+
+    // 繪製音量波形
+    function drawVolumeWaveform(channelData) {
+      const canvas = volumeCanvas;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(161, 140, 209, 0.3)';
+      ctx.strokeStyle = 'var(--primary-color)';
+      ctx.lineWidth = 1;
+      
+      const sampleSize = Math.floor(channelData.length / width);
+      
+      ctx.beginPath();
+      for (let x = 0; x < width; x++) {
+        const start = x * sampleSize;
+        const end = start + sampleSize;
+        let sum = 0;
+        
+        for (let i = start; i < end && i < channelData.length; i++) {
+          sum += Math.abs(channelData[i]);
+        }
+        
+        const average = sum / sampleSize;
+        const y = height - (average * height);
+        
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    }
+
+    // 應用音量調整
+    function applyVolumeAdjustment(adjustment) {
+      if (!originalAudioBuffer) return null;
+      
+      const gainLinear = Math.pow(10, adjustment / 20);
+      adjustedAudioBuffer = audioContext.createBuffer(
+        originalAudioBuffer.numberOfChannels,
+        originalAudioBuffer.length,
+        originalAudioBuffer.sampleRate
+      );
+      
+      for (let channel = 0; channel < originalAudioBuffer.numberOfChannels; channel++) {
+        const originalData = originalAudioBuffer.getChannelData(channel);
+        const adjustedData = adjustedAudioBuffer.getChannelData(channel);
+        
+        for (let i = 0; i < originalData.length; i++) {
+          adjustedData[i] = originalData[i] * gainLinear;
+          // 防止削波
+          if (adjustedData[i] > 1) adjustedData[i] = 1;
+          if (adjustedData[i] < -1) adjustedData[i] = -1;
+        }
+      }
+      
+      return adjustedAudioBuffer;
+    }
+
+    // 播放音檔預覽
+    function playAudioBuffer(buffer) {
+      if (!buffer || !audioContext) return;
+      
+      // 停止當前播放
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.start();
+      
+      // 3秒後自動停止
+      setTimeout(() => {
+        try {
+          source.stop();
+        } catch (e) {
+          // 忽略已停止的錯誤
+        }
+      }, 3000);
+    }
+
+    // 將 AudioBuffer 轉換為 Blob
+    async function audioBufferToBlob(buffer, mimeType = 'audio/wav') {
+      const numberOfChannels = buffer.numberOfChannels;
+      const length = buffer.length;
+      const sampleRate = buffer.sampleRate;
+      const arrayBuffer = new ArrayBuffer(44 + length * numberOfChannels * 2);
+      const view = new DataView(arrayBuffer);
+      
+      // WAV 文件頭
+      const writeString = (offset, string) => {
+        for (let i = 0; i < string.length; i++) {
+          view.setUint8(offset + i, string.charCodeAt(i));
+        }
+      };
+      
+      writeString(0, 'RIFF');
+      view.setUint32(4, 36 + length * numberOfChannels * 2, true);
+      writeString(8, 'WAVE');
+      writeString(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, numberOfChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * numberOfChannels * 2, true);
+      view.setUint16(32, numberOfChannels * 2, true);
+      view.setUint16(34, 16, true);
+      writeString(36, 'data');
+      view.setUint32(40, length * numberOfChannels * 2, true);
+      
+      // 寫入音頻數據
+      let offset = 44;
+      for (let i = 0; i < length; i++) {
+        for (let channel = 0; channel < numberOfChannels; channel++) {
+          const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]));
+          view.setInt16(offset, sample * 0x7FFF, true);
+          offset += 2;
+        }
+      }
+      
+      return new Blob([arrayBuffer], { type: mimeType });
+    }
+
+    // 檔案選擇處理
+    audioFileInput.addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        fileInputText.textContent = file.name;
+        
+        // 顯示音量控制區域
+        volumeControlSection.style.display = 'block';
+        
+        try {
+          // 初始化 Audio Context
+          initAudioContext();
+          
+          // 分析音檔音量
+          showStatus('正在分析音檔音量...', 'success');
+          await analyzeAudioVolume(file);
+          showStatus('音量分析完成', 'success');
+          
+        } catch (error) {
+          console.error('處理音檔失敗:', error);
+          showStatus('處理音檔失敗: ' + error.message, 'error');
+          volumeControlSection.style.display = 'none';
+        }
+      } else {
+        fileInputText.textContent = '點擊選擇音檔檔案 (支援 MP3, WAV, M4A)';
+        volumeControlSection.style.display = 'none';
+      }
+    });
+
+    // ====================================================================
+    //                         音量控制事件監聽器
+    // ====================================================================
+
+    // 音量滑桿事件
+    volumeSlider.addEventListener('input', function(e) {
+      volumeAdjustment = parseFloat(e.target.value);
+      volumeAdjustmentDisplay.textContent = `${volumeAdjustment >= 0 ? '+' : ''}${volumeAdjustment} dB`;
+      
+      // 即時應用音量調整
+      if (originalAudioBuffer) {
+        applyVolumeAdjustment(volumeAdjustment);
+      }
+    });
+
+    // 播放原音檔
+    previewOriginalBtn.addEventListener('click', function() {
+      if (originalAudioBuffer) {
+        playAudioBuffer(originalAudioBuffer);
+        this.textContent = '▶️ 播放中...';
+        this.disabled = true;
+        
+        setTimeout(() => {
+          this.textContent = '🎵 播放原音檔';
+          this.disabled = false;
+        }, 3000);
+      }
+    });
+
+    // 播放調整後音檔
+    previewAdjustedBtn.addEventListener('click', function() {
+      if (volumeAdjustment === 0) {
+        // 沒有調整時播放原音檔
+        playAudioBuffer(originalAudioBuffer);
+      } else {
+        // 應用調整並播放
+        const adjustedBuffer = applyVolumeAdjustment(volumeAdjustment);
+        if (adjustedBuffer) {
+          playAudioBuffer(adjustedBuffer);
+        }
+      }
+      
+      this.textContent = '▶️ 播放中...';
+      this.disabled = true;
+      
+      setTimeout(() => {
+        this.textContent = '🔊 播放調整後';
+        this.disabled = false;
+      }, 3000);
+    });
+
+    // 自動標準化按鈕
+    autoNormalizeBtn.addEventListener('click', function() {
+      if (currentVolumeLevel !== 0) {
+        const targetDb = -12;
+        const recommendedAdjustment = targetDb - currentVolumeLevel;
+        
+        // 限制調整範圍在 -20 到 +20 dB
+        const clampedAdjustment = Math.max(-20, Math.min(20, recommendedAdjustment));
+        
+        volumeSlider.value = clampedAdjustment;
+        volumeAdjustment = clampedAdjustment;
+        volumeAdjustmentDisplay.textContent = `${clampedAdjustment >= 0 ? '+' : ''}${clampedAdjustment.toFixed(1)} dB`;
+        
+        // 應用調整
+        if (originalAudioBuffer) {
+          applyVolumeAdjustment(volumeAdjustment);
+        }
+        
+        showStatus(`已自動調整音量至 ${clampedAdjustment.toFixed(1)} dB`, 'success');
+      }
+    });
+
+    // 顯示狀態訊息
+    function showStatus(message, type = 'success') {
+      statusMessage.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+      setTimeout(() => {
+        statusMessage.innerHTML = '';
+      }, 5000);
+    }
+
+    // 設定上傳狀態
+    function setUploadingState(uploading) {
+      isUploading = uploading;
+      uploadBtn.disabled = uploading;
+      
+      if (uploading) {
+        uploadBtnText.textContent = '上傳中...';
+        uploadLoader.style.display = 'inline-block';
+      } else {
+        uploadBtnText.textContent = '上傳音檔';
+        uploadLoader.style.display = 'none';
+      }
+    }
+
+    // 上傳音檔
+    uploadForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      if (isUploading) return;
+      
+      const description = document.getElementById('soundDescription').value.trim();
+      const recordingDate = document.getElementById('recordingDate').value;
+      const recordingTime = document.getElementById('recordingTime').value;
+      const file = audioFileInput.files[0];
+      
+      if (!description || !recordingDate || !recordingTime || !file) {
+        showStatus('請填寫所有必要欄位', 'error');
+        return;
+      }
+      
+      setUploadingState(true);
+      
+      try {
+        let uploadFile = file;
+        let volumeInfo = '';
+        
+        // 如果有音量調整，先處理音檔
+        if (originalAudioBuffer && volumeAdjustment !== 0) {
+          showStatus('正在應用音量調整...', 'success');
+          
+          const adjustedBuffer = applyVolumeAdjustment(volumeAdjustment);
+          if (adjustedBuffer) {
+            // 將調整後的 AudioBuffer 轉換為 Blob
+            uploadFile = await audioBufferToBlob(adjustedBuffer);
+            volumeInfo = ` (音量調整: ${volumeAdjustment >= 0 ? '+' : ''}${volumeAdjustment} dB)`;
+          }
+        }
+        
+        // 驗證時間格式並生成檔案名稱
+        if (!/^[0-9]+_[0-9]+$/.test(recordingTime)) {
+          showStatus('時間格式錯誤！請使用 "小時_分鐘" 格式，例如：2_30', 'error');
+          return;
+        }
+        
+        // 組合日期和時間標記，生成檔案名稱
+        const dateStr = recordingDate.replace(/-/g, '_'); // 2024-05-10 → 2024_05_10
+        const originalExtension = file.name.split('.').pop();
+        const fileExtension = (originalAudioBuffer && volumeAdjustment !== 0) ? 'wav' : originalExtension;
+        const fileName = `${dateStr}_${recordingTime}.${fileExtension}`;
+        
+        showStatus('正在上傳音檔...', 'success');
+        
+        // 上傳到 Storage
+        const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${fileName}`);
+        const uploadResult = await window.firebase.uploadBytes(storageRef, uploadFile);
+        const downloadURL = await window.firebase.getDownloadURL(uploadResult.ref);
+        
+        showStatus('正在儲存資料...', 'success');
+        
+        // 儲存到 Firestore (包含音量處理資訊和Storage引用)
+        const firestoreData = {
+          description: description,
+          recordingDate: recordingDate,    // 直播日期 (2024-05-10)
+          recordingTime: recordingTime,    // 直播時間標記 (2_30)
+          fileName: fileName,
+          downloadUrl: downloadURL,
+          createdAt: window.firebase.serverTimestamp(),
+          isActive: true,
+          // 增加 Storage 引用，確保數據一致性
+          storageRef: `sounds/${fileName}`,
+          uploadMetadata: {
+            originalFileName: file.name,
+            fileSize: uploadFile.size || file.size,
+            mimeType: uploadFile.type || file.type,
+            uploadTimestamp: Date.now()
+          }
+        };
+        
+        // 如果有音量處理，加入相關資訊
+        if (originalAudioBuffer) {
+          firestoreData.volumeProcessing = {
+            originalVolume: currentVolumeLevel.toFixed(1),
+            adjustment: volumeAdjustment,
+            processed: volumeAdjustment !== 0
+          };
+        }
+        
+        // 使用事務確保 Firestore 和 Storage 的一致性
+        let docRef = null;
+        try {
+          docRef = await window.firebase.addDoc(window.firebase.collection(window.firebase.db, 'sounds'), firestoreData);
+          
+          // 在 Firestore 文件中記錄自己的 ID，形成雙向綁定
+          await window.firebase.updateDoc(docRef, {
+            docId: docRef.id,
+            linkedStorageFile: `sounds/${fileName}`
+          });
+          
+        } catch (firestoreError) {
+          // 如果 Firestore 寫入失敗，清理已上傳的 Storage 檔案
+          console.error('Firestore 寫入失敗，清理 Storage 檔案:', firestoreError);
+          try {
+            await window.firebase.deleteObject(storageRef);
+            console.log('已清理 Storage 中的孤立檔案');
+          } catch (cleanupError) {
+            console.error('清理 Storage 檔案失敗:', cleanupError);
+          }
+          throw new Error('資料庫寫入失敗，已清理上傳檔案');
+        }
+        
+        showStatus(`音檔上傳成功！${volumeInfo}`, 'success');
+        
+        // 重置表單和音量控制
+        uploadForm.reset();
+        fileInputText.textContent = '點擊選擇音檔檔案 (支援 MP3, WAV, M4A)';
+        volumeControlSection.style.display = 'none';
+        
+        // 重置音量處理變數
+        originalAudioBuffer = null;
+        adjustedAudioBuffer = null;
+        currentVolumeLevel = 0;
+        volumeAdjustment = 0;
+        volumeSlider.value = 0;
+        volumeAdjustmentDisplay.textContent = '0 dB';
+        
+        // 重新載入列表
+        loadSoundsList();
+        
+      } catch (error) {
+        console.error('上傳失敗:', error);
+        showStatus('上傳失敗：' + error.message, 'error');
+      } finally {
+        setUploadingState(false);
+      }
+    });
+
+    // 載入音檔列表（從 Firebase 載入所有資料）
+    async function loadSoundsList() {
+      try {
+        soundsTableContainer.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <div class="loading"></div>
+            <p style="margin-top: 10px;">載入中...</p>
+          </div>
+        `;
+        
+        const querySnapshot = await window.firebase.getDocs(
+          window.firebase.collection(window.firebase.db, 'sounds')
+        );
+        
+        // 載入所有音檔資料
+        allSounds = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          allSounds.push({
+            id: doc.id,
+            ...data
+          });
+        });
+        
+        // 更新統計資訊
+        totalCount.textContent = `總計：${allSounds.length} 個音檔`;
+        
+        // 顯示列表
+        updateSoundsList();
+        
+      } catch (error) {
+        console.error('載入列表失敗:', error);
+        soundsTableContainer.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: var(--error-color);">
+            <p>載入失敗：${error.message}</p>
+          </div>
+        `;
+        paginationContainer.style.display = 'none';
+      }
+    }
+
+    // 更新音檔列表顯示（應用搜尋、排序、分頁）
+    function updateSoundsList() {
+      if (allSounds.length === 0) {
+        soundsTableContainer.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">
+            <p>尚未上傳任何音檔</p>
+          </div>
+        `;
+        paginationContainer.style.display = 'none';
+        return;
+      }
+      
+      // 1. 搜尋篩選
+      filteredSounds = allSounds.filter(sound => {
+        if (!searchTerm) return true;
+        
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          sound.description.toLowerCase().includes(searchLower) ||
+          sound.fileName.toLowerCase().includes(searchLower)
+        );
+      });
+      
+      // 2. 排序
+      filteredSounds.sort((a, b) => {
+        switch (sortBy) {
+          case 'newest':
+            return new Date(b.createdAt?.toDate() || 0) - new Date(a.createdAt?.toDate() || 0);
+          case 'oldest':
+            return new Date(a.createdAt?.toDate() || 0) - new Date(b.createdAt?.toDate() || 0);
+          case 'name':
+            return a.description.localeCompare(b.description);
+          case 'date':
+            // 按錄製日期排序
+            const aDate = a.recordingDate || '1970-01-01';
+            const bDate = b.recordingDate || '1970-01-01';
+            return bDate.localeCompare(aDate);
+          default:
+            return 0;
+        }
+      });
+      
+      // 3. 分頁計算
+      const totalPages = pageSize === 'all' ? 1 : Math.ceil(filteredSounds.length / parseInt(pageSize));
+      currentPage = Math.min(currentPage, Math.max(1, totalPages));
+      
+      let paginatedSounds = filteredSounds;
+      if (pageSize !== 'all') {
+        const startIndex = (currentPage - 1) * parseInt(pageSize);
+        const endIndex = startIndex + parseInt(pageSize);
+        paginatedSounds = filteredSounds.slice(startIndex, endIndex);
+      }
+      
+      // 4. 更新統計資訊
+      if (searchTerm) {
+        filteredCount.textContent = `搜尋結果：${filteredSounds.length} 個音檔`;
+      } else {
+        filteredCount.textContent = '';
+      }
+      
+      if (pageSize !== 'all') {
+        currentPageSpan.textContent = `第 ${currentPage} 頁，顯示 ${paginatedSounds.length} 筆`;
+      } else {
+        currentPageSpan.textContent = `顯示全部 ${paginatedSounds.length} 筆`;
+      }
+      
+      // 5. 生成表格
+      generateSoundsTable(paginatedSounds);
+      
+      // 6. 更新分頁控制
+      updatePaginationControls(totalPages);
+    }
+
+    // 生成音檔表格
+    function generateSoundsTable(sounds) {
+      if (sounds.length === 0) {
+        soundsTableContainer.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">
+            <p>沒有符合條件的音檔</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let tableHTML = `
+        <table class="sounds-table">
+          <thead>
+            <tr>
+              <th>描述</th>
+              <th>直播時間</th>
+              <th>檔案名稱</th>
+              <th>上傳時間</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      sounds.forEach((sound) => {
+        // 組合顯示日期和時間
+        let displayTime = '';
+        
+        if (sound.recordingDate && sound.recordingTime) {
+          // 新格式：有分別的日期和時間
+          const date = new Date(sound.recordingDate).toLocaleDateString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          });
+          const [hours, minutes] = sound.recordingTime.split('_');
+          displayTime = `${date} ${hours}h${minutes}m`;
+        } else if (sound.recordingTime && sound.recordingTime.includes('_')) {
+          // 舊格式但只有時間標記
+          const [hours, minutes] = sound.recordingTime.split('_');
+          displayTime = `${hours}h${minutes}m`;
+        } else if (sound.recordingTime) {
+          // 最舊格式：完整日期時間
+          try {
+            displayTime = new Date(sound.recordingTime).toLocaleString('zh-TW');
+          } catch (e) {
+            displayTime = sound.recordingTime;
+          }
+        }
+        
+        const uploadDate = sound.createdAt ? new Date(sound.createdAt.toDate()).toLocaleString('zh-TW') : '未知';
+        
+        tableHTML += `
+          <tr>
+            <td>${sound.description}</td>
+            <td>${displayTime}</td>
+            <td>${sound.fileName}</td>
+            <td>${uploadDate}</td>
+            <td>
+              <button class="btn btn-secondary" onclick="playSound('${sound.downloadUrl}')" style="margin-right: 5px; padding: 6px 12px; font-size: 0.9rem;">播放</button>
+              <button class="btn btn-danger" onclick="deleteSound('${sound.id}', '${sound.fileName}')" style="padding: 6px 12px; font-size: 0.9rem;">刪除</button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      tableHTML += `</tbody></table>`;
+      soundsTableContainer.innerHTML = tableHTML;
+    }
+
+    // 更新分頁控制
+    function updatePaginationControls(totalPages) {
+      if (pageSize === 'all' || totalPages <= 1) {
+        paginationContainer.style.display = 'none';
+        return;
+      }
+      
+      paginationContainer.style.display = 'block';
+      pageInfo.textContent = `第 ${currentPage} 頁，共 ${totalPages} 頁`;
+      
+      // 更新按鈕狀態
+      firstPageBtn.disabled = currentPage === 1;
+      prevPageBtn.disabled = currentPage === 1;
+      nextPageBtn.disabled = currentPage === totalPages;
+      lastPageBtn.disabled = currentPage === totalPages;
+    }
+
+    // 播放音檔
+    window.playSound = function(url) {
+      const audio = new Audio(url);
+      audio.play().catch(error => {
+        showStatus('播放失敗：' + error.message, 'error');
+      });
+    };
+
+    // 強化的刪除音檔函數 - 確保 Storage 和 Database 聯動
+    window.deleteSound = async function(docId, fileName) {
+      if (!confirm('確定要刪除這個音檔嗎？此操作無法復原。')) {
+        return;
+      }
+      
+      let storageDeleted = false;
+      let firestoreDeleted = false;
+      
+      try {
+        showStatus('正在刪除音檔...', 'success');
+        
+        // 1. 先嘗試從 Storage 刪除檔案
+        try {
+          const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${fileName}`);
+          await window.firebase.deleteObject(storageRef);
+          storageDeleted = true;
+          console.log(`Storage 檔案刪除成功: ${fileName}`);
+        } catch (storageError) {
+          console.warn(`Storage 檔案刪除失敗 (可能已被刪除): ${fileName}`, storageError);
+          // 即使 Storage 刪除失敗，也繼續刪除 Firestore 記錄
+        }
+        
+        // 2. 再從 Firestore 刪除記錄
+        try {
+          await window.firebase.deleteDoc(window.firebase.doc(window.firebase.db, 'sounds', docId));
+          firestoreDeleted = true;
+          console.log(`Firestore 記錄刪除成功: ${docId}`);
+        } catch (firestoreError) {
+          console.error(`Firestore 記錄刪除失敗: ${docId}`, firestoreError);
+          
+          // 如果 Firestore 刪除失敗但 Storage 已刪除，給出警告
+          if (storageDeleted) {
+            showStatus('警告：檔案已刪除但資料庫記錄刪除失敗，請手動清理', 'error');
+            return;
+          }
+          throw firestoreError;
+        }
+        
+        // 3. 刪除成功
+        const statusMsg = storageDeleted && firestoreDeleted 
+          ? '音檔完全刪除成功 ✓' 
+          : `音檔部分刪除 (Storage: ${storageDeleted ? '✓' : '✗'}, Database: ${firestoreDeleted ? '✓' : '✗'})`;
+        
+        showStatus(statusMsg, storageDeleted && firestoreDeleted ? 'success' : 'error');
+        
+        // 從本地列表中移除已刪除的音檔
+        if (firestoreDeleted) {
+          allSounds = allSounds.filter(sound => sound.id !== docId);
+          updateSoundsList();
+        }
+        
+      } catch (error) {
+        console.error('刪除過程發生錯誤:', error);
+        showStatus('刪除失敗：' + error.message, 'error');
+        
+        // 提供修復建議
+        if (storageDeleted && !firestoreDeleted) {
+          console.warn('檢測到孤立的資料庫記錄，建議手動清理');
+        }
+      }
+    };
+
+    // 數據一致性檢查功能
+    async function checkDataConsistency() {
+      try {
+        checkConsistencyBtn.disabled = true;
+        checkConsistencyBtn.innerHTML = '🔍 檢查中...';
+        showStatus('正在檢查數據一致性...', 'success');
+        
+        // 獲取所有 Firestore 記錄
+        const querySnapshot = await window.firebase.getDocs(
+          window.firebase.collection(window.firebase.db, 'sounds')
+        );
+        
+        let totalRecords = 0;
+        let validRecords = 0;
+        let brokenRecords = [];
+        
+        for (const doc of querySnapshot.docs) {
+          totalRecords++;
+          const data = doc.data();
+          const fileName = data.fileName;
+          
+          try {
+            // 檢查對應的 Storage 檔案是否存在
+            const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${fileName}`);
+            await window.firebase.getDownloadURL(storageRef);
+            validRecords++;
+          } catch (storageError) {
+            // Storage 檔案不存在
+            brokenRecords.push({
+              docId: doc.id,
+              fileName: fileName,
+              description: data.description,
+              error: 'Storage 檔案不存在'
+            });
+          }
+        }
+        
+        // 顯示檢查結果
+        let resultMessage = `檢查完成：共 ${totalRecords} 筆記錄，${validRecords} 筆正常`;
+        
+        if (brokenRecords.length > 0) {
+          resultMessage += `，${brokenRecords.length} 筆異常`;
+          console.warn('發現異常記錄:', brokenRecords);
+          
+          // 詢問是否清理異常記錄
+          if (confirm(`發現 ${brokenRecords.length} 筆孤立的資料庫記錄（Storage 檔案已遺失）。\\n是否要清理這些記錄？`)) {
+            await cleanupBrokenRecords(brokenRecords);
+          }
+        }
+        
+        showStatus(resultMessage, brokenRecords.length > 0 ? 'error' : 'success');
+        
+      } catch (error) {
+        console.error('一致性檢查失敗:', error);
+        showStatus('一致性檢查失敗：' + error.message, 'error');
+      } finally {
+        checkConsistencyBtn.disabled = false;
+        checkConsistencyBtn.innerHTML = '🔍 檢查數據一致性';
+      }
+    }
+    
+    // 清理孤立的資料庫記錄
+    async function cleanupBrokenRecords(brokenRecords) {
+      let cleanedCount = 0;
+      
+      for (const record of brokenRecords) {
+        try {
+          await window.firebase.deleteDoc(window.firebase.doc(window.firebase.db, 'sounds', record.docId));
+          cleanedCount++;
+          console.log(`已清理孤立記錄: ${record.fileName}`);
+        } catch (error) {
+          console.error(`清理記錄失敗: ${record.fileName}`, error);
+        }
+      }
+      
+      showStatus(`已清理 ${cleanedCount}/${brokenRecords.length} 筆孤立記錄`, 'success');
+      loadSoundsList(); // 重新載入列表
+    }
+
+    // 刷新按鈕
+    refreshBtn.addEventListener('click', loadSoundsList);
+    
+    // 一致性檢查按鈕
+    checkConsistencyBtn.addEventListener('click', checkDataConsistency);
+    
+    // 搜尋功能
+    searchInput.addEventListener('input', function(e) {
+      searchTerm = e.target.value.trim();
+      currentPage = 1; // 重置到第一頁
+      updateSoundsList();
+    });
+    
+    // 排序功能
+    sortSelect.addEventListener('change', function(e) {
+      sortBy = e.target.value;
+      currentPage = 1; // 重置到第一頁
+      updateSoundsList();
+    });
+    
+    // 每頁數量功能
+    pageSizeSelect.addEventListener('change', function(e) {
+      pageSize = e.target.value;
+      currentPage = 1; // 重置到第一頁
+      updateSoundsList();
+    });
+    
+    // 分頁按鈕
+    firstPageBtn.addEventListener('click', function() {
+      currentPage = 1;
+      updateSoundsList();
+    });
+    
+    prevPageBtn.addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        updateSoundsList();
+      }
+    });
+    
+    nextPageBtn.addEventListener('click', function() {
+      const totalPages = pageSize === 'all' ? 1 : Math.ceil(filteredSounds.length / parseInt(pageSize));
+      if (currentPage < totalPages) {
+        currentPage++;
+        updateSoundsList();
+      }
+    });
+    
+    lastPageBtn.addEventListener('click', function() {
+      const totalPages = pageSize === 'all' ? 1 : Math.ceil(filteredSounds.length / parseInt(pageSize));
+      currentPage = totalPages;
+      updateSoundsList();
+    });
+    
+    // 匯出功能
+    exportBtn.addEventListener('click', function() {
+      const csvContent = generateCSV();
+      downloadCSV(csvContent, `音檔清單_${new Date().toISOString().split('T')[0]}.csv`);
+    });
+    
+    // 批量音量標準化功能
+    batchNormalizeBtn.addEventListener('click', async function() {
+      if (!confirm('這將會對所有音檔進行音量標準化處理，可能需要較長時間。確定要繼續嗎？\n\n注意：這會重新處理並上傳所有音檔。')) {
+        return;
+      }
+      
+      await batchNormalizeAudio();
+    });
+    
+    // 生成 CSV 內容
+    function generateCSV() {
+      const headers = ['描述', '錄製日期', '錄製時間', '檔案名稱', '上傳時間', '下載連結'];
+      const rows = [headers];
+      
+      filteredSounds.forEach(sound => {
+        const uploadDate = sound.createdAt ? new Date(sound.createdAt.toDate()).toLocaleString('zh-TW') : '未知';
+        rows.push([
+          sound.description,
+          sound.recordingDate || '',
+          sound.recordingTime || '',
+          sound.fileName,
+          uploadDate,
+          sound.downloadUrl
+        ]);
+      });
+      
+      return rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    }
+    
+    // 下載 CSV 檔案
+    function downloadCSV(content, filename) {
+      const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+    
+    // 批量音量標準化處理
+    async function batchNormalizeAudio() {
+      try {
+        batchNormalizeBtn.disabled = true;
+        batchNormalizeBtn.textContent = '處理中...';
+        
+        const targetDb = -12; // 目標音量
+        let processed = 0;
+        let skipped = 0;
+        let failed = 0;
+        
+        showStatus('開始批量音量標準化處理...', 'success');
+        
+        // 初始化 Audio Context
+        initAudioContext();
+        
+        for (const sound of allSounds) {
+          try {
+            showStatus(`處理中 (${processed + skipped + failed + 1}/${allSounds.length}): ${sound.description}`, 'success');
+            
+            // 下載原音檔
+            const response = await fetch(sound.downloadUrl);
+            if (!response.ok) {
+              console.warn(`無法下載音檔: ${sound.fileName}`);
+              failed++;
+              continue;
+            }
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            
+            // 分析音量
+            const channelData = audioBuffer.getChannelData(0);
+            let sum = 0;
+            for (let i = 0; i < channelData.length; i++) {
+              const sample = Math.abs(channelData[i]);
+              sum += sample * sample;
+            }
+            const rms = Math.sqrt(sum / channelData.length);
+            const rmsDb = 20 * Math.log10(rms);
+            
+            // 計算需要的調整量
+            const adjustment = targetDb - rmsDb;
+            
+            // 如果調整量很小，跳過
+            if (Math.abs(adjustment) < 1) {
+              console.log(`跳過 ${sound.description}: 音量已經適中 (${rmsDb.toFixed(1)} dB)`);
+              skipped++;
+              continue;
+            }
+            
+            // 應用音量調整
+            const gainLinear = Math.pow(10, adjustment / 20);
+            const adjustedBuffer = audioContext.createBuffer(
+              audioBuffer.numberOfChannels,
+              audioBuffer.length,
+              audioBuffer.sampleRate
+            );
+            
+            for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+              const originalData = audioBuffer.getChannelData(channel);
+              const adjustedData = adjustedBuffer.getChannelData(channel);
+              
+              for (let i = 0; i < originalData.length; i++) {
+                adjustedData[i] = originalData[i] * gainLinear;
+                // 防止削波
+                if (adjustedData[i] > 1) adjustedData[i] = 1;
+                if (adjustedData[i] < -1) adjustedData[i] = -1;
+              }
+            }
+            
+            // 轉換為 WAV 格式並上傳
+            const processedBlob = await audioBufferToBlob(adjustedBuffer);
+            
+            // 生成新檔名（保持原格式但改為 .wav）
+            const baseFileName = sound.fileName.replace(/\.[^/.]+$/, "");
+            const newFileName = `${baseFileName}.wav`;
+            
+            // 上傳處理後的音檔
+            const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${newFileName}`);
+            const uploadResult = await window.firebase.uploadBytes(storageRef, processedBlob);
+            const downloadURL = await window.firebase.getDownloadURL(uploadResult.ref);
+            
+            // 更新 Firestore 記錄
+            await window.firebase.updateDoc(window.firebase.doc(window.firebase.db, 'sounds', sound.id), {
+              fileName: newFileName,
+              downloadUrl: downloadURL,
+              volumeProcessing: {
+                originalVolume: rmsDb.toFixed(1),
+                adjustment: adjustment.toFixed(1),
+                processed: true,
+                processedAt: window.firebase.serverTimestamp()
+              }
+            });
+            
+            // 如果檔名改變了，刪除舊檔案
+            if (newFileName !== sound.fileName) {
+              try {
+                const oldStorageRef = window.firebase.ref(window.firebase.storage, `sounds/${sound.fileName}`);
+                await window.firebase.deleteObject(oldStorageRef);
+              } catch (deleteError) {
+                console.warn(`無法刪除舊檔案 ${sound.fileName}:`, deleteError);
+              }
+            }
+            
+            processed++;
+            console.log(`✓ 處理完成: ${sound.description} (調整 ${adjustment.toFixed(1)} dB)`);
+            
+            // 小延遲避免請求過於頻繁
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+          } catch (error) {
+            console.error(`處理 ${sound.description} 失敗:`, error);
+            failed++;
+          }
+        }
+        
+        showStatus(`批量標準化完成！處理：${processed} 個，跳過：${skipped} 個，失敗：${failed} 個`, 'success');
+        
+        // 重新載入列表
+        await loadSoundsList();
+        
+      } catch (error) {
+        console.error('批量標準化失敗:', error);
+        showStatus('批量標準化失敗：' + error.message, 'error');
+      } finally {
+        batchNormalizeBtn.disabled = false;
+        batchNormalizeBtn.textContent = '🔊 批量音量標準化';
+      }
+    }
+    
+    // ====================================================================
+    //                         Authentication 事件監聽器
+    // ====================================================================
+    
+    // 登入表單處理
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      
+      if (!email || !password) {
+        showLoginStatus('請填寫所有欄位', 'error');
+        return;
+      }
+      
+      setLoginState(true);
+      
+      try {
+        await handleLogin(email, password);
+        // 登入成功後，onAuthStateChanged 會自動處理 UI 更新
+      } catch (error) {
+        // 錯誤已在 handleLogin 中處理
+      } finally {
+        setLoginState(false);
+      }
+    });
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 設定默認日期為今天
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('recordingDate').value = today;
+      
+      // 監聽認證狀態變化
+      window.firebase.onAuthStateChanged(window.firebase.auth, (user) => {
+        console.log('認證狀態變化:', user ? user.email : '未登入');
+        updateAuthStatus(user);
+      });
+    });
+  </script>
+</body>
+</html>

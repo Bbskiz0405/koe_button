@@ -298,6 +298,7 @@
       <li><a href="https://www.instagram.com/koe__zzz/" target="_blank" rel="noopener">Instagram</a></li>
       <li><a href="https://lit.link/en/iamkoe" target="_blank" rel="noopener">支持心咲koe</a></li>
       <li><a href="about.html">關於網站</a></li>
+      <li><a href="admin.html">管理後台</a></li>
     </ul>
   </div>
 
@@ -306,42 +307,12 @@
     <!-- 主卡片 -->
     <div class="main-card glass-card">
       <h2 class="card-title">心咲koe的哈欠集合</h2>
-      <div class="button-container">
-        <button class="candy-btn" data-sound="yawn1">哈姆</button>
-        <button class="candy-btn" data-sound="yawn2">哈嗨ㄏㄚˋ</button>
-        <button class="candy-btn" data-sound="yawn3">哈ㄚ</button>
-        <button class="candy-btn" data-sound="yawn4">這個是日文歌還是英文歌呢</button>
-        <button class="candy-btn" data-sound="yawn5">哈疑疑</button>
-        <button class="candy-btn" data-sound="yawn6">美聲哈欠</button>
-        <button class="candy-btn" data-sound="yawn7">剛剛那也是哈欠</button>
-        <button class="candy-btn" data-sound="yawn8">前半段是哈欠</button>
-        <!--button class="candy-btn" data-sound="yawn9">講到哈欠又想打哈欠了 哈ㄏㄧ</button-->
-        <button class="candy-btn" data-sound="yawn10">一一哈嗨哈（音效</button>
-        <!--button class="candy-btn" data-sound="yawn11">我們剛好先等垃圾車唱完</button-->
-        <button class="candy-btn" data-sound="yawn12">哈ㄏㄚˋ</button>
-        <!--button class="candy-btn" data-sound="yawn13">這個版本我沒聽過ㄟ</button-->
-        <!--button class="candy-btn" data-sound="yawn14">好想睡覺歐 疑呀</button-->
-        <button class="candy-btn" data-sound="yawn15">嗚歐 哈嗨</button>
-        <button class="candy-btn" data-sound="yawn16">剛剛那是哈欠 沒錯</button>
-        <button class="candy-btn" data-sound="yawn17">啊哈哈$%^&</button>
-        <button class="candy-btn" data-sound="yawn18">剛剛那個是哈欠嗎</button>
-        <button class="candy-btn" data-sound="yawn19">下一首</button>
-        <button class="candy-btn" data-sound="yawn20">哈～～（吸氣版</button>
-        <button class="candy-btn" data-sound="yawn21">剛剛那是哈欠但是吸氣版的</button>
-        <button class="candy-btn" data-sound="yawn22">嗚！剛那是哈欠</button>
-        <button class="candy-btn" data-sound="yawn23">哈 啊啊啊～</button>
-        <button class="candy-btn" data-sound="yawn24">哈ㄚㄚㄚOK</button>
-        <!--button class="candy-btn" data-sound="yawn25">哈（抖音斜向下</button-->
-        <button class="candy-btn" data-sound="yawn26">哈ㄚ ㄋㄧㄚ ㄋㄧㄚ 狂打哈欠</button>
-        <button class="candy-btn" data-sound="yawn27">哈ㄚ</button>
-        <button class="candy-btn" data-sound="yawn28">哈呀 呵氣泡音哈欠 你們剛有聽到嗎</button>
-        <button class="candy-btn" data-sound="yawn29">哈ㄚ哈哈 兩個禮拜算很長吧 那又如何呢 是又怎樣</button>
-        <button class="candy-btn" data-sound="yawn30">繰り返す</button>
-        <button class="candy-btn" data-sound="yawn31">都很喜歡</button>
-        <button class="candy-btn" data-sound="yawn32">ㄏㄚㄏㄧㄏㄞㄏㄚ</button>
-        <button class="candy-btn" data-sound="yawn33">我不行了 停止唱歌就會一直想打哈欠</button>
-        <button class="candy-btn" data-sound="yawn34">而且不只我穿新衣服 連他也穿新衣服</button>
-        <button class="candy-btn" data-sound="yawn35">不要聯想 哈ㄏㄚˋ</button>
+      <div class="button-container" id="buttonContainer">
+        <!-- 按鈕將由 JavaScript 動態生成 -->
+        <div id="loadingButtons" style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+          <div class="loader" style="margin: 0 auto 15px;"></div>
+          <p>載入音檔中...</p>
+        </div>
       </div>
 
       <!-- 音頻可視化器 -->
@@ -367,48 +338,16 @@
   </footer>
 
   <!-- Script -->
-  <script>
+  <!-- Firebase 配置 -->
+  <script type="module" src="firebase-config.js"></script>
+  
+  <script type="module">
     // ====================================================================
-    //                          Configuration
+    //                    Dynamic Sound Loading System
     // ====================================================================
-    const soundPaths = {
-      yawn1: 'sounds/5_10_1_45.mp3',
-      yawn2: 'sounds/5_10_2_05.mp3',
-      yawn3: 'sounds/5_10_2_30.mp3',
-      yawn4: 'sounds/5_10_2_37.mp3',
-      yawn5: 'sounds/5_10_2_40.mp3',
-      yawn6: 'sounds/5_10_2_51.mp3',
-      yawn7: 'sounds/5_10_2_40_2.mp3',
-      yawn8: 'sounds/5_10_2_51_2.mp3',
-      //yawn9: 'sounds/5_10_3_06.mp3',//
-      yawn10: 'sounds/5_10_3_08.mp3',
-      //yawn11: 'sounds/5_17_0_20.mp3',//
-      yawn12: 'sounds/5_17_0_30.mp3',
-      //yawn13: 'sounds/5_17_1_00.mp3',//
-      //yawn14: 'sounds/5_17_1_14.mp3',//
-      yawn15: 'sounds/5_17_1_23.mp3',
-      yawn16: 'sounds/5_17_1_24.mp3',
-      yawn17: 'sounds/5_17_1_34.mp3',
-      yawn18: 'sounds/5_17_1_49.mp3',
-      yawn19: 'sounds/5_17_1_58.mp3',
-      yawn20: 'sounds/5_17_2_22.mp3',
-      yawn21: 'sounds/5_17_2_23.mp3',
-      yawn22: 'sounds/5_17_2_25.mp3',
-      yawn23: 'sounds/5_17_2_59.mp3',
-      yawn24: 'sounds/5_17_3_21.mp3',
-      //yawn25: 'sounds/6_21_0_07.mp3',//
-      yawn26: 'sounds/6_21_0_10.mp3',
-      yawn27: 'sounds/6_21_0_13.mp3',
-      yawn28: 'sounds/6_21_0_16.mp3',
-      yawn29: 'sounds/6_21_0_39.mp3',
-      yawn30: 'sounds/6_21_0_46.mp3',
-      yawn31: 'sounds/6_21_0_51.mp3',
-      yawn32: 'sounds/6_21_1_02.mp3',
-      yawn33: 'sounds/6_21_1_04.mp3',
-      yawn34: 'sounds/6_21_1_06.mp3',
-      yawn35: 'sounds/6_21_1_31.mp3'
-    };
-    const audioFiles = {};
+    
+    let soundsData = [];
+    let audioFiles = {};
     let currentAudio = null;
     let currentButton = null;
 
@@ -416,32 +355,124 @@
     //                          Function Definitions
     // ====================================================================
 
-    function preloadAudio() {
-      console.log("Initializing audio preloading...");
-      Object.keys(soundPaths).forEach(key => {
-        const path = soundPaths[key];
-        audioFiles[key] = new Audio(path);
-        audioFiles[key].preload = 'auto';
-        audioFiles[key].onerror = () => {
-            console.error(`Error loading audio: ${key} at ${path}`);
-            const button = document.querySelector(`.candy-btn[data-sound="${key}"]`);
-            if (button) {
-                button.disabled = true;
-                button.title = "音檔載入失敗";
-                button.style.opacity = '0.5';
-            }
-        };
-      });
+    // 從 Firebase 載入音檔資料
+    async function loadSoundsFromFirebase() {
+      try {
+        console.log("Loading sounds from Firebase...");
+        const querySnapshot = await window.firebase.getDocs(
+          window.firebase.collection(window.firebase.db, 'sounds')
+        );
+        
+        soundsData = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.isActive) {
+            soundsData.push({
+              id: doc.id,
+              ...data
+            });
+          }
+        });
+        
+        // 按錄製時間排序
+        soundsData.sort((a, b) => new Date(a.recordingTime) - new Date(b.recordingTime));
+        
+        console.log(`Loaded ${soundsData.length} sounds from Firebase`);
+        return soundsData;
+        
+      } catch (error) {
+        console.error('載入音檔失敗:', error);
+        throw error;
+      }
     }
 
-    function playSound(soundName, button) {
+    // 生成按鈕
+    function generateButtons(sounds) {
+      const buttonContainer = document.getElementById('buttonContainer');
+      const loadingDiv = document.getElementById('loadingButtons');
+      
+      // 移除載入提示
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+      
+      if (sounds.length === 0) {
+        buttonContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+            <p>尚未上傳任何音檔</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">
+              <a href="admin.html" style="color: var(--primary-color);">前往管理後台上傳音檔</a>
+            </p>
+          </div>
+        `;
+        return;
+      }
+      
+      let buttonsHTML = '';
+      sounds.forEach((sound, index) => {
+        const soundId = `sound_${sound.id}`;
+        buttonsHTML += `
+          <button class="candy-btn" data-sound-id="${soundId}" data-sound-url="${sound.downloadUrl}">
+            ${sound.description}
+          </button>
+        `;
+      });
+      
+      buttonContainer.innerHTML = buttonsHTML;
+      
+      // 設定按鈕事件監聽器
+      setupButtons();
+      
+      console.log(`Generated ${sounds.length} buttons`);
+    }
+
+    // 預載音檔
+    function preloadAudio(sounds) {
+      console.log("開始預載音檔...");
+      
+      sounds.forEach((sound) => {
+        const soundId = `sound_${sound.id}`;
+        audioFiles[soundId] = new Audio(sound.downloadUrl);
+        audioFiles[soundId].preload = 'metadata'; // 只載入元數據，節省頻寬
+        
+        audioFiles[soundId].onerror = () => {
+          console.error(`音檔載入失敗: ${sound.description}`);
+          const button = document.querySelector(`[data-sound-id="${soundId}"]`);
+          if (button) {
+            button.disabled = true;
+            button.title = "音檔載入失敗";
+            button.style.opacity = '0.5';
+          }
+        };
+      });
+      
+      console.log(`預載了 ${sounds.length} 個音檔`);
+    }
+
+    // 播放音檔
+    function playSound(soundId, button) {
       try {
-        if (!audioFiles[soundName] || audioFiles[soundName].error) {
-          console.error(`Audio not available: ${soundName}`);
-          alert('抱歉，這個音頻檔案無法播放。');
+        // 如果沒有預載的音檔，嘗試使用 URL 直接播放
+        let audio = audioFiles[soundId];
+        if (!audio) {
+          const soundUrl = button.dataset.soundUrl;
+          if (soundUrl) {
+            audio = new Audio(soundUrl);
+            audioFiles[soundId] = audio;
+          } else {
+            console.error(`音檔不可用: ${soundId}`);
+            alert('抱歉，這個音檔無法播放。');
+            return;
+          }
+        }
+        
+        if (audio.error) {
+          console.error(`音檔載入錯誤: ${soundId}`);
+          alert('抱歉，這個音檔載入失敗。');
           return;
         }
         
+        // 停止當前播放的音檔
         if (currentAudio) {
           currentAudio.pause();
           currentAudio.currentTime = 0;
@@ -450,7 +481,7 @@
           btn.classList.remove('playing');
         });
 
-        const audio = audioFiles[soundName];
+        // 播放新音檔
         audio.currentTime = 0;
         currentAudio = audio;
         currentButton = button;
@@ -473,41 +504,52 @@
                 animateVisualizer();
               }
             }).catch(error => {
-              console.error('Playback failed:', error);
+              console.error('播放失敗:', error);
               button.classList.remove('playing');
               if (error.name === 'NotAllowedError') {
                 alert('瀏覽器限制了自動播放，請先點擊頁面任意處再試。');
+              } else {
+                alert('播放失敗，請稍後再試。');
               }
             });
         }
       } catch (error) {
-        console.error('Error in playSound:', error);
+        console.error('播放音檔時發生錯誤:', error);
         if (button) button.classList.remove('playing');
       }
     }
 
+    // 設定按鈕事件監聽器
     function setupButtons() {
-      console.log("Setting up buttons...");
-      const buttons = document.querySelectorAll('.candy-btn[data-sound]');
+      console.log("設定按鈕事件監聽器...");
+      const buttons = document.querySelectorAll('.candy-btn[data-sound-id]');
       buttons.forEach(button => {
-        const soundName = button.dataset.sound;
-        if (soundName) {
-            button.addEventListener('click', function() {
-                playSound(soundName, this);
-            });
+        const soundId = button.dataset.soundId;
+        if (soundId) {
+          button.addEventListener('click', function() {
+            playSound(soundId, this);
+          });
         }
       });
     }
 
+    // 隨機播放音檔
     function playRandomSound() {
-        const soundKeys = Object.keys(soundPaths);
-        const randomKey = soundKeys[Math.floor(Math.random() * soundKeys.length)];
-        const randomButton = document.querySelector(`.candy-btn[data-sound='${randomKey}']`);
-        if (randomButton) {
-            playSound(randomKey, randomButton);
-        } else {
-            console.error(`Could not find button for random sound: ${randomKey}`);
-        }
+      const buttons = document.querySelectorAll('.candy-btn[data-sound-id]:not([disabled])');
+      if (buttons.length === 0) {
+        console.log('沒有可播放的音檔');
+        return;
+      }
+      
+      const randomIndex = Math.floor(Math.random() * buttons.length);
+      const randomButton = buttons[randomIndex];
+      const soundId = randomButton.dataset.soundId;
+      
+      if (soundId) {
+        playSound(soundId, randomButton);
+      } else {
+        console.error('無法找到隨機音檔');
+      }
     }
 
     function setupSideMenu() {
@@ -560,15 +602,47 @@
     //                          Initialization
     // ====================================================================
 
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log("DOM fully loaded. Initializing application.");
+    // 初始化應用程式
+    async function initializeApp() {
+      console.log("開始初始化應用程式...");
+      
       try {
-        preloadAudio();
-        setupButtons();
+        // 設定側邊選單
         setupSideMenu();
+        
+        // 載入音檔資料
+        const sounds = await loadSoundsFromFirebase();
+        
+        // 生成按鈕
+        generateButtons(sounds);
+        
+        // 預載音檔
+        preloadAudio(sounds);
+        
+        console.log("應用程式初始化完成");
+        
       } catch (error) {
-        console.error("Initialization script failed:", error);
+        console.error("初始化失敗:", error);
+        
+        // 顯示錯誤訊息
+        const buttonContainer = document.getElementById('buttonContainer');
+        const loadingDiv = document.getElementById('loadingButtons');
+        
+        if (loadingDiv) {
+          loadingDiv.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--error-color);">
+              <p>❌ 載入失敗</p>
+              <p style="margin-top: 10px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+                請檢查網路連線或稍後再試
+              </p>
+              <button onclick="location.reload()" class="btn btn-secondary" style="margin-top: 15px; padding: 8px 16px; font-size: 0.9rem;">
+                重新載入
+              </button>
+            </div>
+          `;
+        }
       } finally {
+        // 隱藏載入動畫
         setTimeout(() => {
           const loader = document.getElementById('loaderContainer');
           if (loader) {
@@ -577,15 +651,42 @@
           }
         }, 500);
       }
+    }
+
+    // DOM 載入完成後初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 等待 Firebase 配置載入
+      setTimeout(() => {
+        if (window.firebase) {
+          initializeApp();
+        } else {
+          console.error('Firebase 配置未載入');
+          // 顯示配置錯誤訊息
+          const loadingDiv = document.getElementById('loadingButtons');
+          if (loadingDiv) {
+            loadingDiv.innerHTML = `
+              <div style="text-align: center; padding: 40px; color: var(--error-color);">
+                <p>❌ Firebase 配置錯誤</p>
+                <p style="margin-top: 10px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+                  請檢查 firebase-config.js 設定
+                </p>
+              </div>
+            `;
+          }
+        }
+      }, 1000);
     });
 
-    // Global handlers for inline onclick attributes
+    // 全域事件處理器
     window.onclick = function(event) {
       const modal = document.getElementById('aboutModal');
       if (modal && event.target == modal) {
         modal.style.display = 'none';
       }
     };
+    
+    // 將 playRandomSound 函數設為全域，供 HTML 使用
+    window.playRandomSound = playRandomSound;
   </script>
     <button id="random-play-btn" class="fab" onclick="playRandomSound()" aria-label="Play Random Sound">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon">

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>音檔遷移工具 - 心咲koe哈欠按鈕</title>
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: linear-gradient(135deg, #1e1e3f, #15152c);
+      color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(14px);
+    }
+
+    h1 {
+      text-align: center;
+      color: #a18cd1;
+      margin-bottom: 30px;
+    }
+
+    .warning {
+      background: rgba(255, 152, 0, 0.2);
+      border: 1px solid #ff9800;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #ff9800;
+    }
+
+    .info {
+      background: rgba(33, 150, 243, 0.2);
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #2196f3;
+    }
+
+    .success {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid #4caf50;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #4caf50;
+    }
+
+    .btn {
+      background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 10px 5px;
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .progress {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      height: 20px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .log {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    .sound-mapping {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 10px;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+    }
+
+    .sound-mapping-header {
+      font-weight: bold;
+      color: #a18cd1;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 5px;
+    }
+
+    .sound-item {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎵 音檔遷移工具</h1>
+    
+    <div class="warning">
+      <strong>⚠️ 注意事項：</strong>
+      <ul>
+        <li>這個工具會將現有的本地音檔上傳到 Firebase</li>
+        <li>請確保已經完成 Firebase 設定並且已登入</li>
+        <li>遷移過程中請勿關閉頁面</li>
+        <li>建議在網路狀況良好時進行遷移</li>
+      </ul>
+    </div>
+
+    <!-- 登入狀態顯示 -->
+    <div id="authStatus" class="info" style="display: none;">
+      <strong>🔐 登入狀態：</strong>
+      <span id="authStatusText">檢查中...</span>
+    </div>
+
+    <div class="info">
+      <strong>📋 將要遷移的音檔：</strong>
+      <div class="sound-mapping">
+        <div class="sound-mapping-header">檔案名稱</div>
+        <div class="sound-mapping-header">按鈕文字</div>
+        <div class="sound-mapping-header">狀態</div>
+        
+        <div class="sound-item">5_10_1_45.mp3</div>
+        <div class="sound-item">哈姆</div>
+        <div class="sound-item" id="status-yawn1">待處理</div>
+        
+        <div class="sound-item">5_10_2_05.mp3</div>
+        <div class="sound-item">哈嗨ㄏㄚˋ</div>
+        <div class="sound-item" id="status-yawn2">待處理</div>
+        
+        <div class="sound-item">5_10_2_30.mp3</div>
+        <div class="sound-item">哈ㄚ</div>
+        <div class="sound-item" id="status-yawn3">待處理</div>
+        
+        <!-- 更多音檔會由 JavaScript 動態生成 -->
+      </div>
+    </div>
+
+    <div style="text-align: center;">
+      <button id="startMigration" class="btn">開始遷移</button>
+      <button id="checkStatus" class="btn">檢查狀態</button>
+    </div>
+
+    <div class="progress" id="progressContainer" style="display: none;">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div id="statusMessage"></div>
+
+    <div class="log" id="logContainer" style="display: none;">
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <!-- Firebase 配置 -->
+  <script type="module" src="firebase-config.js"></script>
+
+  <script type="module">
+    // 現有音檔映射 - 格式：月_日_小時_分鐘
+    const existingSounds = {
+      yawn1: { file: '5_10_1_45.mp3', description: '哈姆', date: '2024-05-10', time: '1_45' },
+      yawn2: { file: '5_10_2_05.mp3', description: '哈嗨ㄏㄚˋ', date: '2024-05-10', time: '2_05' },
+      yawn3: { file: '5_10_2_30.mp3', description: '哈ㄚ', date: '2024-05-10', time: '2_30' },
+      yawn4: { file: '5_10_2_37.mp3', description: '這個是日文歌還是英文歌呢', date: '2024-05-10', time: '2_37' },
+      yawn5: { file: '5_10_2_40.mp3', description: '哈疑疑', date: '2024-05-10', time: '2_40' },
+      yawn6: { file: '5_10_2_51.mp3', description: '美聲哈欠', date: '2024-05-10', time: '2_51' },
+      yawn7: { file: '5_10_2_40_2.mp3', description: '剛剛那也是哈欠', date: '2024-05-10', time: '2_40_2' },
+      yawn8: { file: '5_10_2_51_2.mp3', description: '前半段是哈欠', date: '2024-05-10', time: '2_51_2' },
+      yawn10: { file: '5_10_3_08.mp3', description: '一一哈嗨哈（音效', date: '2024-05-10', time: '3_08' },
+      yawn12: { file: '5_17_0_30.mp3', description: '哈ㄏㄚˋ', date: '2024-05-17', time: '0_30' },
+      yawn15: { file: '5_17_1_23.mp3', description: '嗚歐 哈嗨', date: '2024-05-17', time: '1_23' },
+      yawn16: { file: '5_17_1_24.mp3', description: '剛剛那是哈欠 沒錯', date: '2024-05-17', time: '1_24' },
+      yawn17: { file: '5_17_1_34.mp3', description: '啊哈哈$%^&', date: '2024-05-17', time: '1_34' },
+      yawn18: { file: '5_17_1_49.mp3', description: '剛剛那個是哈欠嗎', date: '2024-05-17', time: '1_49' },
+      yawn19: { file: '5_17_1_58.mp3', description: '下一首', date: '2024-05-17', time: '1_58' },
+      yawn20: { file: '5_17_2_22.mp3', description: '哈～～（吸氣版', date: '2024-05-17', time: '2_22' },
+      yawn21: { file: '5_17_2_23.mp3', description: '剛剛那是哈欠但是吸氣版的', date: '2024-05-17', time: '2_23' },
+      yawn22: { file: '5_17_2_25.mp3', description: '嗚！剛那是哈欠', date: '2024-05-17', time: '2_25' },
+      yawn23: { file: '5_17_2_59.mp3', description: '哈 啊啊啊～', date: '2024-05-17', time: '2_59' },
+      yawn24: { file: '5_17_3_21.mp3', description: '哈ㄚㄚㄚOK', date: '2024-05-17', time: '3_21' },
+      yawn26: { file: '6_21_0_10.mp3', description: '哈ㄚ ㄋㄧㄚ ㄋㄧㄚ 狂打哈欠', date: '2024-06-21', time: '0_10' },
+      yawn27: { file: '6_21_0_13.mp3', description: '哈ㄚ', date: '2024-06-21', time: '0_13' },
+      yawn28: { file: '6_21_0_16.mp3', description: '哈呀 呵氣泡音哈欠 你們剛有聽到嗎', date: '2024-06-21', time: '0_16' },
+      yawn29: { file: '6_21_0_39.mp3', description: '哈ㄚ哈哈 兩個禮拜算很長吧 那又如何呢 是又怎樣', date: '2024-06-21', time: '0_39' },
+      yawn30: { file: '6_21_0_46.mp3', description: '繰り返す', date: '2024-06-21', time: '0_46' },
+      yawn31: { file: '6_21_0_51.mp3', description: '都很喜歡', date: '2024-06-21', time: '0_51' },
+      yawn32: { file: '6_21_1_02.mp3', description: 'ㄏㄚㄏㄧㄏㄞㄏㄚ', date: '2024-06-21', time: '1_02' },
+      yawn33: { file: '6_21_1_04.mp3', description: '我不行了 停止唱歌就會一直想打哈欠', date: '2024-06-21', time: '1_04' },
+      yawn34: { file: '6_21_1_06.mp3', description: '而且不只我穿新衣服 連他也穿新衣服', date: '2024-06-21', time: '1_06' },
+      yawn35: { file: '6_21_1_31.mp3', description: '不要聯想 哈ㄏㄚˋ', date: '2024-06-21', time: '1_31' }
+    };
+
+    let migrationInProgress = false;
+    let currentProgress = 0;
+    let currentUser = null;
+    const totalSounds = Object.keys(existingSounds).length;
+
+    // DOM 元素
+    const startBtn = document.getElementById('startMigration');
+    const checkBtn = document.getElementById('checkStatus');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const statusMessage = document.getElementById('statusMessage');
+    const logContainer = document.getElementById('logContainer');
+    const log = document.getElementById('log');
+    const authStatus = document.getElementById('authStatus');
+    const authStatusText = document.getElementById('authStatusText');
+
+    // 記錄日誌
+    function addLog(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = document.createElement('div');
+      logEntry.style.color = type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : '#ffffff';
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      log.appendChild(logEntry);
+      log.scrollTop = log.scrollHeight;
+      
+      if (logContainer.style.display === 'none') {
+        logContainer.style.display = 'block';
+      }
+    }
+
+    // 更新狀態
+    function updateStatus(soundId, status, isError = false) {
+      const statusElement = document.getElementById(`status-${soundId}`);
+      if (statusElement) {
+        statusElement.textContent = status;
+        statusElement.style.color = isError ? '#f44336' : '#4caf50';
+      }
+    }
+
+    // 更新進度
+    function updateProgress(completed) {
+      currentProgress = completed;
+      const percentage = (completed / totalSounds) * 100;
+      progressBar.style.width = `${percentage}%`;
+      
+      if (completed === totalSounds) {
+        showMessage('🎉 遷移完成！所有音檔已成功上傳到 Firebase。', 'success');
+        migrationInProgress = false;
+        startBtn.disabled = false;
+        startBtn.textContent = '開始遷移';
+      }
+    }
+
+    // 顯示訊息
+    function showMessage(message, type = 'info') {
+      statusMessage.innerHTML = `<div class="${type}">${message}</div>`;
+    }
+
+    // 更新認證狀態顯示
+    function updateAuthStatus(user) {
+      authStatus.style.display = 'block';
+      
+      if (user) {
+        currentUser = user;
+        authStatusText.innerHTML = `✅ 已登入: <strong>${user.email}</strong>`;
+        authStatus.className = 'success';
+        startBtn.disabled = false;
+        addLog(`用戶已登入: ${user.email}`);
+      } else {
+        currentUser = null;
+        authStatusText.innerHTML = '❌ 未登入，請先到 <a href="admin.html" style="color: #fbc2eb;">admin.html</a> 登入';
+        authStatus.className = 'warning';
+        startBtn.disabled = true;
+        addLog('用戶未登入，無法執行遷移');
+      }
+    }
+
+    // 檢查 Firebase 連接狀態
+    async function checkFirebaseStatus() {
+      try {
+        if (!window.firebase) {
+          throw new Error('Firebase 未載入');
+        }
+        
+        // 檢查認證狀態
+        if (!currentUser) {
+          throw new Error('請先登入才能檢查狀態');
+        }
+        
+        // 嘗試讀取 sounds 集合
+        const querySnapshot = await window.firebase.getDocs(
+          window.firebase.collection(window.firebase.db, 'sounds')
+        );
+        
+        showMessage(`✅ Firebase 連接正常，目前已有 ${querySnapshot.size} 個音檔`, 'success');
+        addLog(`Firebase 連接檢查成功，發現 ${querySnapshot.size} 個現有音檔`);
+        
+      } catch (error) {
+        showMessage(`❌ Firebase 連接失敗：${error.message}`, 'error');
+        addLog(`Firebase 連接檢查失敗：${error.message}`, 'error');
+      }
+    }
+
+    // 載入並上傳音檔
+    async function uploadSound(soundId, soundData) {
+      try {
+        addLog(`開始處理 ${soundData.description} (${soundData.file})`);
+        updateStatus(soundId, '下載中...');
+        
+        // 從本地載入音檔
+        const response = await fetch(`sounds/${soundData.file}`);
+        if (!response.ok) {
+          throw new Error(`無法載入檔案 ${soundData.file}`);
+        }
+        
+        const blob = await response.blob();
+        addLog(`檔案 ${soundData.file} 載入成功，大小：${(blob.size / 1024).toFixed(1)} KB`);
+        
+        updateStatus(soundId, '上傳中...');
+        
+        // 生成新檔案名稱 - 使用新格式：年_月_日_小時_分鐘.副檔名
+        const dateStr = soundData.date.replace(/-/g, '_'); // 2024-05-10 → 2024_05_10
+        const fileExtension = soundData.file.split('.').pop();
+        const newFileName = `${dateStr}_${soundData.time}.${fileExtension}`;
+        
+        // 上傳到 Firebase Storage
+        const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${newFileName}`);
+        const uploadResult = await window.firebase.uploadBytes(storageRef, blob);
+        const downloadURL = await window.firebase.getDownloadURL(uploadResult.ref);
+        
+        addLog(`檔案上傳成功：${newFileName}`);
+        
+        // 儲存到 Firestore - 使用新的資料結構
+        await window.firebase.addDoc(window.firebase.collection(window.firebase.db, 'sounds'), {
+          description: soundData.description,
+          recordingDate: soundData.date,    // 直播日期 (2024-05-10)
+          recordingTime: soundData.time,    // 直播時間標記 (1_45)
+          fileName: newFileName,
+          downloadUrl: downloadURL,
+          createdAt: window.firebase.serverTimestamp(),
+          isActive: true,
+          migratedFrom: soundData.file,     // 記錄原始檔案名稱
+          storageRef: `sounds/${newFileName}`,
+          uploadMetadata: {
+            originalFileName: soundData.file,
+            fileSize: blob.size,
+            mimeType: blob.type,
+            uploadTimestamp: Date.now()
+          }
+        });
+        
+        updateStatus(soundId, '完成');
+        addLog(`${soundData.description} 遷移完成`, 'success');
+        
+        return true;
+        
+      } catch (error) {
+        updateStatus(soundId, `失敗: ${error.message}`, true);
+        addLog(`${soundData.description} 遷移失敗：${error.message}`, 'error');
+        return false;
+      }
+    }
+
+    // 開始遷移
+    async function startMigration() {
+      if (migrationInProgress) return;
+      
+      if (!window.firebase) {
+        showMessage('❌ Firebase 未載入，請檢查配置', 'error');
+        return;
+      }
+      
+      if (!currentUser) {
+        showMessage('❌ 請先登入才能執行遷移', 'error');
+        addLog('遷移失敗：用戶未登入', 'error');
+        return;
+      }
+      
+      if (!confirm('確定要開始遷移嗎？這將會上傳所有本地音檔到 Firebase。')) {
+        return;
+      }
+      
+      migrationInProgress = true;
+      startBtn.disabled = true;
+      startBtn.textContent = '遷移中...';
+      progressContainer.style.display = 'block';
+      
+      addLog('開始音檔遷移流程');
+      
+      let completed = 0;
+      const soundIds = Object.keys(existingSounds);
+      
+      // 逐個處理音檔（避免並發過多請求）
+      for (const soundId of soundIds) {
+        const success = await uploadSound(soundId, existingSounds[soundId]);
+        if (success) {
+          completed++;
+        }
+        updateProgress(completed);
+        
+        // 小延遲避免請求過於頻繁
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      addLog(`遷移流程完成，成功：${completed}/${totalSounds}`);
+    }
+
+    // 事件監聽器
+    startBtn.addEventListener('click', startMigration);
+    checkBtn.addEventListener('click', checkFirebaseStatus);
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 等待 Firebase 載入
+      setTimeout(() => {
+        if (window.firebase) {
+          addLog('Firebase 配置載入成功');
+          
+          // 監聽認證狀態變化
+          window.firebase.onAuthStateChanged(window.firebase.auth, (user) => {
+            console.log('認證狀態變化:', user ? user.email : '未登入');
+            updateAuthStatus(user);
+            
+            if (user) {
+              checkFirebaseStatus();
+            }
+          });
+          
+        } else {
+          showMessage('❌ Firebase 配置載入失敗，請檢查 firebase-config.js', 'error');
+          addLog('Firebase 配置載入失敗', 'error');
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
