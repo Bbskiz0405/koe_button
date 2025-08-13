@@ -384,12 +384,39 @@
       </h2>
       <form id="uploadForm">
         <div class="form-group">
+          <label class="form-label">音檔類型</label>
+          <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+            <label style="display: flex; align-items: center; cursor: pointer;">
+              <input 
+                type="radio" 
+                name="soundType" 
+                value="yawn" 
+                id="typeYawn" 
+                checked
+                style="margin-right: 8px;"
+              />
+              <span>😴 哈欠音檔</span>
+            </label>
+            <label style="display: flex; align-items: center; cursor: pointer;">
+              <input 
+                type="radio" 
+                name="soundType" 
+                value="milktea" 
+                id="typeMilktea"
+                style="margin-right: 8px;"
+              />
+              <span>🧋 奶茶音檔</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group">
           <label class="form-label" for="soundDescription">音檔描述 (按鈕文字)</label>
           <input 
             type="text" 
             id="soundDescription" 
             class="form-input" 
-            placeholder="例如：哈姆、哈嗨ㄏㄚˋ" 
+            placeholder="例如：哈姆、哈嗨ㄏㄚˋ 或 好喝、奶茶時間" 
             required
           />
         </div>
@@ -529,6 +556,34 @@
       </h2>
       <!-- 搜尋和控制區域 -->
       <div style="margin-bottom: 20px;">
+        <!-- 類型選擇 -->
+        <div style="margin-bottom: 15px;">
+          <label class="form-label">查看音檔類型</label>
+          <div style="display: flex; gap: 20px;">
+            <label style="display: flex; align-items: center; cursor: pointer;">
+              <input 
+                type="radio" 
+                name="listType" 
+                value="yawn" 
+                id="listTypeYawn" 
+                checked
+                style="margin-right: 8px;"
+              />
+              <span>😴 哈欠音檔</span>
+            </label>
+            <label style="display: flex; align-items: center; cursor: pointer;">
+              <input 
+                type="radio" 
+                name="listType" 
+                value="milktea" 
+                id="listTypeMilktea"
+                style="margin-right: 8px;"
+              />
+              <span>🧋 奶茶音檔</span>
+            </label>
+          </div>
+        </div>
+        
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <!-- 搜尋框 -->
           <div style="flex: 1; min-width: 200px;">
@@ -618,12 +673,15 @@
     let volumeAdjustment = 0;
     
     // 列表管理相關變數
-    let allSounds = [];          // 所有音檔資料
+    let allYawnSounds = [];      // 所有哈欠音檔資料
+    let allMilkteaSounds = [];   // 所有奶茶音檔資料
+    let currentSounds = [];      // 當前顯示的音檔資料
     let filteredSounds = [];     // 篩選後的音檔資料
     let currentPage = 1;         // 當前頁數
     let pageSize = 25;           // 每頁顯示數量
     let sortBy = 'newest';       // 排序方式
     let searchTerm = '';         // 搜尋關鍵字
+    let currentListType = 'yawn'; // 當前查看的音檔類型
 
     // DOM 元素
     const uploadForm = document.getElementById('uploadForm');
@@ -1113,12 +1171,13 @@
       
       if (isUploading) return;
       
+      const soundType = document.querySelector('input[name="soundType"]:checked').value;
       const description = document.getElementById('soundDescription').value.trim();
       const recordingDate = document.getElementById('recordingDate').value;
       const recordingTime = document.getElementById('recordingTime').value;
       const file = audioFileInput.files[0];
       
-      if (!description || !recordingDate || !recordingTime || !file) {
+      if (!soundType || !description || !recordingDate || !recordingTime || !file) {
         showStatus('請填寫所有必要欄位', 'error');
         return;
       }
@@ -1155,12 +1214,16 @@
         
         showStatus('正在上傳音檔...', 'success');
         
-        // 上傳到 Storage
-        const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${fileName}`);
+        // 根據音檔類型決定 Storage 路徑
+        const storagePath = soundType === 'yawn' ? 'sounds' : 'milktea';
+        const storageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${fileName}`);
         const uploadResult = await window.firebase.uploadBytes(storageRef, uploadFile);
         const downloadURL = await window.firebase.getDownloadURL(uploadResult.ref);
         
         showStatus('正在儲存資料...', 'success');
+        
+        // 根據音檔類型決定 Collection 名稱
+        const collectionName = soundType === 'yawn' ? 'sounds' : 'milktea_sounds';
         
         // 儲存到 Firestore (包含音量處理資訊和Storage引用)
         const firestoreData = {
@@ -1172,7 +1235,7 @@
           createdAt: window.firebase.serverTimestamp(),
           isActive: true,
           // 增加 Storage 引用，確保數據一致性
-          storageRef: `sounds/${fileName}`,
+          storageRef: `${storagePath}/${fileName}`,
           uploadMetadata: {
             originalFileName: file.name,
             fileSize: uploadFile.size || file.size,
@@ -1193,12 +1256,12 @@
         // 使用事務確保 Firestore 和 Storage 的一致性
         let docRef = null;
         try {
-          docRef = await window.firebase.addDoc(window.firebase.collection(window.firebase.db, 'sounds'), firestoreData);
+          docRef = await window.firebase.addDoc(window.firebase.collection(window.firebase.db, collectionName), firestoreData);
           
           // 在 Firestore 文件中記錄自己的 ID，形成雙向綁定
           await window.firebase.updateDoc(docRef, {
             docId: docRef.id,
-            linkedStorageFile: `sounds/${fileName}`
+            linkedStorageFile: `${storagePath}/${fileName}`
           });
           
         } catch (firestoreError) {
@@ -1249,22 +1312,48 @@
           </div>
         `;
         
-        const querySnapshot = await window.firebase.getDocs(
+        // 載入哈欠音檔
+        const yawnSnapshot = await window.firebase.getDocs(
           window.firebase.collection(window.firebase.db, 'sounds')
         );
         
-        // 載入所有音檔資料
-        allSounds = [];
-        querySnapshot.forEach((doc) => {
+        allYawnSounds = [];
+        yawnSnapshot.forEach((doc) => {
           const data = doc.data();
-          allSounds.push({
+          allYawnSounds.push({
             id: doc.id,
+            type: 'yawn',
             ...data
           });
         });
         
+        // 載入奶茶音檔
+        let allMilkteaSoundsLocal = [];
+        try {
+          const milkteaSnapshot = await window.firebase.getDocs(
+            window.firebase.collection(window.firebase.db, 'milktea_sounds')
+          );
+          
+          milkteaSnapshot.forEach((doc) => {
+            const data = doc.data();
+            allMilkteaSoundsLocal.push({
+              id: doc.id,
+              type: 'milktea',
+              ...data
+            });
+          });
+        } catch (milkteaError) {
+          console.warn('奶茶音檔 collection 不存在，可能尚未創建:', milkteaError);
+        }
+        
+        allMilkteaSounds = allMilkteaSoundsLocal;
+        
+        // 根據當前選擇的類型設定 currentSounds
+        currentSounds = currentListType === 'yawn' ? allYawnSounds : allMilkteaSounds;
+        
         // 更新統計資訊
-        totalCount.textContent = `總計：${allSounds.length} 個音檔`;
+        const typeText = currentListType === 'yawn' ? '哈欠' : '奶茶';
+        totalCount.textContent = `總計：${currentSounds.length} 個${typeText}音檔`;
         
         // 顯示列表
         updateSoundsList();
@@ -1282,10 +1371,11 @@
 
     // 更新音檔列表顯示（應用搜尋、排序、分頁）
     function updateSoundsList() {
-      if (allSounds.length === 0) {
+      if (currentSounds.length === 0) {
+        const typeText = currentListType === 'yawn' ? '哈欠' : '奶茶';
         soundsTableContainer.innerHTML = `
           <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">
-            <p>尚未上傳任何音檔</p>
+            <p>尚未上傳任何${typeText}音檔</p>
           </div>
         `;
         paginationContainer.style.display = 'none';
@@ -1293,7 +1383,7 @@
       }
       
       // 1. 搜尋篩選
-      filteredSounds = allSounds.filter(sound => {
+      filteredSounds = currentSounds.filter(sound => {
         if (!searchTerm) return true;
         
         const searchLower = searchTerm.toLowerCase();
@@ -1450,9 +1540,15 @@
     };
 
     // 強化的刪除音檔函數 - 確保 Storage 和 Database 聯動
-    window.deleteSound = async function(docId, fileName) {
+    window.deleteSound = async function(docId, fileName, soundType = null) {
       if (!confirm('確定要刪除這個音檔嗎？此操作無法復原。')) {
         return;
+      }
+      
+      // 如果沒有提供 soundType，嘗試從當前顯示的列表中找出類型
+      if (!soundType) {
+        const sound = currentSounds.find(s => s.id === docId);
+        soundType = sound ? sound.type || currentListType : currentListType;
       }
       
       let storageDeleted = false;
@@ -1463,7 +1559,8 @@
         
         // 1. 先嘗試從 Storage 刪除檔案
         try {
-          const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${fileName}`);
+          const storagePath = soundType === 'yawn' ? 'sounds' : 'milktea';
+          const storageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${fileName}`);
           await window.firebase.deleteObject(storageRef);
           storageDeleted = true;
           console.log(`Storage 檔案刪除成功: ${fileName}`);
@@ -1474,7 +1571,8 @@
         
         // 2. 再從 Firestore 刪除記錄
         try {
-          await window.firebase.deleteDoc(window.firebase.doc(window.firebase.db, 'sounds', docId));
+          const collectionName = soundType === 'yawn' ? 'sounds' : 'milktea_sounds';
+          await window.firebase.deleteDoc(window.firebase.doc(window.firebase.db, collectionName, docId));
           firestoreDeleted = true;
           console.log(`Firestore 記錄刪除成功: ${docId}`);
         } catch (firestoreError) {
@@ -1497,7 +1595,12 @@
         
         // 從本地列表中移除已刪除的音檔
         if (firestoreDeleted) {
-          allSounds = allSounds.filter(sound => sound.id !== docId);
+          if (soundType === 'yawn') {
+            allYawnSounds = allYawnSounds.filter(sound => sound.id !== docId);
+          } else {
+            allMilkteaSounds = allMilkteaSounds.filter(sound => sound.id !== docId);
+          }
+          currentSounds = currentListType === 'yawn' ? allYawnSounds : allMilkteaSounds;
           updateSoundsList();
         }
         
@@ -1645,10 +1748,33 @@
       updateSoundsList();
     });
     
+    // 類型切換功能
+    document.querySelectorAll('input[name="listType"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.checked) {
+          currentListType = this.value;
+          currentSounds = currentListType === 'yawn' ? allYawnSounds : allMilkteaSounds;
+          
+          // 更新統計資訊
+          const typeText = currentListType === 'yawn' ? '哈欠' : '奶茶';
+          totalCount.textContent = `總計：${currentSounds.length} 個${typeText}音檔`;
+          
+          // 重置搜尋和分頁
+          searchInput.value = '';
+          searchTerm = '';
+          currentPage = 1;
+          
+          // 更新列表
+          updateSoundsList();
+        }
+      });
+    });
+    
     // 匯出功能
     exportBtn.addEventListener('click', function() {
       const csvContent = generateCSV();
-      downloadCSV(csvContent, `音檔清單_${new Date().toISOString().split('T')[0]}.csv`);
+      const typeText = currentListType === 'yawn' ? '哈欠' : '奶茶';
+      downloadCSV(csvContent, `${typeText}音檔清單_${new Date().toISOString().split('T')[0]}.csv`);
     });
     
     // 批量音量標準化功能

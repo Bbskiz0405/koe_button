@@ -6,21 +6,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1e1e3f" />
-  <title>心咲koe哈欠按鈕</title>
+  <title>心咲koe好喝奶茶按鈕</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     /* ===== Global Styles & Variables ===== */
     :root {
-      --primary-color: #a18cd1;
-      --secondary-color: #fbc2eb;
-      --dark-bg: #1e1e3f;
-      --darker-bg: #15152c;
-      --menu-bg: rgba(20, 20, 45, 0.5);
+      --primary-color: #d19ba1; /* 改為奶茶色調 */
+      --secondary-color: #f4d8cd;
+      --dark-bg: #3f2e1e; /* 改為溫暖的棕色調 */
+      --darker-bg: #2c1c15;
+      --menu-bg: rgba(45, 30, 20, 0.5);
       --card-bg: rgba(255, 255, 255, 0.05);
       --text-color: #f0f0f0;
       --header-height: 60px;
       --transition-speed: 0.35s;
-      --glow-color: rgba(161, 196, 253, 0.7);
+      --glow-color: rgba(209, 155, 161, 0.7);
     }
 
     * {
@@ -52,7 +52,7 @@
     .site-title { font-size: 20px; font-weight: 700; margin: 0; background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
     .menu-toggle { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 8px; transition: all var(--transition-speed) ease; background: transparent; border: 1px solid transparent; color: var(--text-color); }
     .menu-toggle:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
-    .side-menu { position: fixed; top: var(--header-height); right: -300px; width: 280px; height: calc(100% - var(--header-height)); background: rgba(15, 15, 35, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: white; padding: 30px 20px; box-shadow: -4px 0 20px rgba(0,0,0,0.5); transition: right var(--transition-speed) ease-in-out; z-index: 1000; overflow-y: auto; }
+    .side-menu { position: fixed; top: var(--header-height); right: -300px; width: 280px; height: calc(100% - var(--header-height)); background: rgba(25, 15, 10, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: white; padding: 30px 20px; box-shadow: -4px 0 20px rgba(0,0,0,0.5); transition: right var(--transition-speed) ease-in-out; z-index: 1000; overflow-y: auto; }
     .side-menu.active { right: 0; }
     .side-menu h2 { margin-top: 0; font-size: 22px; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 12px; margin-bottom: 20px; color: var(--primary-color); }
     .side-menu ul { list-style: none; padding: 0; }
@@ -66,7 +66,7 @@
     .card-title { font-size: 2.2rem; font-weight: 700; margin-bottom: 32px; background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 15px rgba(0,0,0,0.2); }
 
     /* ===== Glass Card & Button Container ===== */
-    .glass-card { padding: 0; /* Removed padding to let main-card handle it */ display: flex; flex-direction: column; align-items: center; gap: 24px; }
+    .glass-card { padding: 0; display: flex; flex-direction: column; align-items: center; gap: 24px; }
     .button-container { 
       display: flex; 
       flex-wrap: wrap; 
@@ -79,20 +79,20 @@
       padding: 0 12px;
     }
 
-    /* ===== Candy Capsule Buttons ===== */
-    .candy-btn {
+    /* ===== Milk Tea Capsule Buttons ===== */
+    .milktea-btn {
       white-space: normal;
       word-break: break-word;
       border: none;
       outline: none;
       padding: 0.8em 1.3em;
       border-radius: 50px;
-      background: linear-gradient(90deg, #fcb69f 0%, #ffecd2 100%);
-      color: #5a2d82;
+      background: linear-gradient(90deg, #d19ba1 0%, #f4d8cd 100%); /* 奶茶色調 */
+      color: #5a2d1e; /* 深咖啡色文字 */
       font-weight: 600;
       font-size: 0.9rem;
       line-height: 1.4;
-      box-shadow: 0 2px 8px rgba(252, 182, 159, 0.3);
+      box-shadow: 0 2px 8px rgba(209, 155, 161, 0.3);
       transition: all 0.2s ease;
       cursor: pointer;
       display: inline-flex;
@@ -109,32 +109,32 @@
       word-wrap: break-word;
     }
     
-    .candy-btn::after {
+    .milktea-btn::after {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%);
+      background: linear-gradient(90deg, #c8a882 0%, #e6c7b8 100%); /* 更深的奶茶色 */
       opacity: 0;
       z-index: -1;
       transition: opacity 0.3s ease;
     }
     
-    .candy-btn:hover::after {
+    .milktea-btn:hover::after {
       opacity: 1;
     }
     
-    .candy-btn:hover {
-      color: #2d3562;
+    .milktea-btn:hover {
+      color: #3d1e12;
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(161, 196, 253, 0.4);
+      box-shadow: 0 6px 20px rgba(209, 155, 161, 0.4);
     }
     
-    .candy-btn:active {
+    .milktea-btn:active {
       transform: translateY(1px);
-      box-shadow: 0 2px 10px rgba(161, 196, 253, 0.3);
+      box-shadow: 0 2px 10px rgba(209, 155, 161, 0.3);
     }
     
     @media (max-width: 768px) {
@@ -143,7 +143,7 @@
         justify-content: center;
       }
       
-      .candy-btn {
+      .milktea-btn {
         font-size: 0.85rem;
         padding: 0.7em 1em;
         margin: 4px;
@@ -151,17 +151,17 @@
         flex: 1 1 auto;
       }
     }
-    .candy-btn:hover {
-      background: linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%);
-      color: #2d3562;
+    .milktea-btn:hover {
+      background: linear-gradient(90deg, #c8a882 0%, #e6c7b8 100%);
+      color: #3d1e12;
       transform: translateY(-4px) scale(1.03);
-      box-shadow: 0 8px 25px rgba(161, 196, 253, 0.35);
+      box-shadow: 0 8px 25px rgba(209, 155, 161, 0.35);
     }
-    .candy-btn:active {
+    .milktea-btn:active {
       transform: translateY(-1px) scale(0.98);
-      box-shadow: 0 2px 10px rgba(161, 196, 253, 0.3);
+      box-shadow: 0 2px 10px rgba(209, 155, 161, 0.3);
     }
-    .candy-btn.playing {
+    .milktea-btn.playing {
       animation: pulse-glow 1.5s infinite alternate;
     }
 
@@ -178,7 +178,7 @@
 
     /* ===== Modal (Unchanged) ===== */
     .modal { display: none; position: fixed; z-index: 1002; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
-    .modal-content { background-color: #1e1e3f; margin: 15% auto; padding: 25px 30px; border: 1px solid var(--primary-color); width: 80%; max-width: 500px; border-radius: 16px; box-shadow: 0 5px 25px rgba(0,0,0,0.4); color: var(--text-color); }
+    .modal-content { background-color: var(--dark-bg); margin: 15% auto; padding: 25px 30px; border: 1px solid var(--primary-color); width: 80%; max-width: 500px; border-radius: 16px; box-shadow: 0 5px 25px rgba(0,0,0,0.4); color: var(--text-color); }
     .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
     .close:hover, .close:focus { color: white; text-decoration: none; }
 
@@ -188,14 +188,14 @@
       .main-card { width: 100%; padding: 32px 24px; }
       .card-title { font-size: 1.8rem; margin-bottom: 24px; }
       .button-container { gap: 12px; }
-      .candy-btn { font-size: 0.95rem; padding: 0.7em 1.5em; }
+      .milktea-btn { font-size: 0.95rem; padding: 0.7em 1.5em; }
     }
 
     @media (max-width: 480px) {
       .main-card { padding: 24px 16px; }
       .card-title { font-size: 1.5rem; }
       .button-container { gap: 10px; }
-      .candy-btn { font-size: 0.9rem; padding: 0.6em 1.2em; }
+      .milktea-btn { font-size: 0.9rem; padding: 0.6em 1.2em; }
     }
         .fab {
         position: fixed;
@@ -203,7 +203,7 @@
         height: 64px;
         bottom: 30px;
         right: 30px;
-        background: rgba(30, 30, 63, 0.5);
+        background: rgba(63, 46, 30, 0.5);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         color: rgba(255, 255, 255, 0.9);
@@ -233,7 +233,7 @@
         right: 0;
         bottom: 0;
         border-radius: 50%;
-        background: radial-gradient(circle at 50% 0%, rgba(161, 140, 209, 0.6), transparent 70%);
+        background: radial-gradient(circle at 50% 0%, rgba(209, 155, 161, 0.6), transparent 70%);
         opacity: 0;
         transition: opacity 0.4s ease, transform 0.4s ease;
         pointer-events: none;
@@ -242,7 +242,7 @@
 
       .fab:hover {
         transform: translateY(-4px) scale(1.05);
-        background: rgba(45, 45, 80, 0.7);
+        background: rgba(75, 50, 35, 0.7);
         border-color: rgba(255, 255, 255, 0.2);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
       }
@@ -262,7 +262,6 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       }
 
-
     </style>
 </head>
 <body>
@@ -277,15 +276,15 @@
     <div class="modal-content">
       <span class="close" onclick="closeAboutModal()">&times;</span>
       <h2>關於網站</h2>
-      <p>心咲koe哈欠按鈕是一個專門為心咲koe的哈欠音效提供播放功能的網站。</p>
-      <p>您可以通過這個網站輕鬆播放心咲koe的各種哈欠音效，並且可以通過側邊欄的連結關注心咲koe的社交媒體。</p>
+      <p>心咲koe好喝奶茶按鈕是一個專門為心咲koe奶茶相關音效提供播放功能的網站。</p>
+      <p>您可以通過這個網站輕鬆播放心咲koe的各種奶茶相關音效，並且可以通過側邊欄的連結關注心咲koe的社交媒體。</p>
       <p>如果您喜歡這個網站，請考慮支持心咲koe！</p>
     </div>
   </div>
 
   <!-- 頭部 -->
   <header class="main-header">
-    <a href="index.html" class="site-title">心咲koe哈欠按鈕</a>
+    <a href="milktea.html" class="site-title">心咲koe好喝奶茶按鈕</a>
     <button class="menu-toggle" id="menuToggle" aria-label="開啟選單">☰</button>
   </header>
 
@@ -297,7 +296,7 @@
       <li><a href="https://x.com/KOE__zzZ" target="_blank" rel="noopener">X (Twitter)</a></li>
       <li><a href="https://www.instagram.com/koe__zzz/" target="_blank" rel="noopener">Instagram</a></li>
       <li><a href="https://lit.link/en/iamkoe" target="_blank" rel="noopener">支持心咲koe</a></li>
-      <li><a href="milktea.html">🧋 奶茶按鈕</a></li>
+      <li><a href="index.html">😴 哈欠按鈕</a></li>
       <li><a href="about.html">關於網站</a></li>
       <li><a href="admin.html">管理後台</a></li>
     </ul>
@@ -307,7 +306,7 @@
   <main class="main-content">
     <!-- 主卡片 -->
     <div class="main-card glass-card">
-      <h2 class="card-title">心咲koe的哈欠集合</h2>
+      <h2 class="card-title">心咲koe的奶茶集合</h2>
       <div class="button-container" id="buttonContainer">
         <!-- 按鈕將由 JavaScript 動態生成 -->
         <div id="loadingButtons" style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
@@ -334,8 +333,8 @@
 
     <!-- 頁腳 -->
   <footer class="footer">
-    <p>© 2025 心咲koe哈欠按鈕 | 音頻資源僅供個人使用</p>
-    <div id="audioStatus" style="margin-top:10px; font-size:12px; color:#fbc2eb;"></div>
+    <p>© 2025 心咲koe好喝奶茶按鈕 | 音頻資源僅供個人使用</p>
+    <div id="audioStatus" style="margin-top:10px; font-size:12px; color:#f4d8cd;"></div>
   </footer>
 
   <!-- Script -->
@@ -344,7 +343,7 @@
   
   <script type="module">
     // ====================================================================
-    //                    Dynamic Sound Loading System
+    //                    Dynamic Sound Loading System for Milk Tea
     // ====================================================================
     
     let soundsData = [];
@@ -356,12 +355,12 @@
     //                          Function Definitions
     // ====================================================================
 
-    // 從 Firebase 載入音檔資料
+    // 從 Firebase 載入奶茶音檔資料
     async function loadSoundsFromFirebase() {
       try {
-        console.log("Loading sounds from Firebase...");
+        console.log("Loading milk tea sounds from Firebase...");
         const querySnapshot = await window.firebase.getDocs(
-          window.firebase.collection(window.firebase.db, 'sounds')
+          window.firebase.collection(window.firebase.db, 'milktea_sounds')
         );
         
         soundsData = [];
@@ -378,7 +377,7 @@
         // 按錄製時間排序
         soundsData.sort((a, b) => new Date(a.recordingTime) - new Date(b.recordingTime));
         
-        console.log(`Loaded ${soundsData.length} sounds from Firebase`);
+        console.log(`Loaded ${soundsData.length} milk tea sounds from Firebase`);
         return soundsData;
         
       } catch (error) {
@@ -400,7 +399,7 @@
       if (sounds.length === 0) {
         buttonContainer.innerHTML = `
           <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
-            <p>尚未上傳任何音檔</p>
+            <p>尚未上傳任何奶茶音檔</p>
             <p style="margin-top: 10px; font-size: 0.9rem;">
               <a href="admin.html" style="color: var(--primary-color);">前往管理後台上傳音檔</a>
             </p>
@@ -413,7 +412,7 @@
       sounds.forEach((sound, index) => {
         const soundId = `sound_${sound.id}`;
         buttonsHTML += `
-          <button class="candy-btn" data-sound-id="${soundId}" data-sound-url="${sound.downloadUrl}">
+          <button class="milktea-btn" data-sound-id="${soundId}" data-sound-url="${sound.downloadUrl}">
             ${sound.description}
           </button>
         `;
@@ -424,17 +423,17 @@
       // 設定按鈕事件監聽器
       setupButtons();
       
-      console.log(`Generated ${sounds.length} buttons`);
+      console.log(`Generated ${sounds.length} milk tea buttons`);
     }
 
     // 預載音檔
     function preloadAudio(sounds) {
-      console.log("開始預載音檔...");
+      console.log("開始預載奶茶音檔...");
       
       sounds.forEach((sound) => {
         const soundId = `sound_${sound.id}`;
         audioFiles[soundId] = new Audio(sound.downloadUrl);
-        audioFiles[soundId].preload = 'metadata'; // 只載入元數據，節省頻寬
+        audioFiles[soundId].preload = 'metadata';
         
         audioFiles[soundId].onerror = () => {
           console.error(`音檔載入失敗: ${sound.description}`);
@@ -447,13 +446,12 @@
         };
       });
       
-      console.log(`預載了 ${sounds.length} 個音檔`);
+      console.log(`預載了 ${sounds.length} 個奶茶音檔`);
     }
 
     // 播放音檔
     function playSound(soundId, button) {
       try {
-        // 如果沒有預載的音檔，嘗試使用 URL 直接播放
         let audio = audioFiles[soundId];
         if (!audio) {
           const soundUrl = button.dataset.soundUrl;
@@ -478,7 +476,7 @@
           currentAudio.pause();
           currentAudio.currentTime = 0;
         }
-        document.querySelectorAll('.candy-btn.playing').forEach(btn => {
+        document.querySelectorAll('.milktea-btn.playing').forEach(btn => {
           btn.classList.remove('playing');
         });
 
@@ -523,7 +521,7 @@
     // 設定按鈕事件監聽器
     function setupButtons() {
       console.log("設定按鈕事件監聽器...");
-      const buttons = document.querySelectorAll('.candy-btn[data-sound-id]');
+      const buttons = document.querySelectorAll('.milktea-btn[data-sound-id]');
       buttons.forEach(button => {
         const soundId = button.dataset.soundId;
         if (soundId) {
@@ -536,7 +534,7 @@
 
     // 隨機播放音檔
     function playRandomSound() {
-      const buttons = document.querySelectorAll('.candy-btn[data-sound-id]:not([disabled])');
+      const buttons = document.querySelectorAll('.milktea-btn[data-sound-id]:not([disabled])');
       if (buttons.length === 0) {
         console.log('沒有可播放的音檔');
         return;
@@ -605,7 +603,7 @@
 
     // 初始化應用程式
     async function initializeApp() {
-      console.log("開始初始化應用程式...");
+      console.log("開始初始化奶茶按鈕應用程式...");
       
       try {
         // 設定側邊選單
@@ -620,7 +618,7 @@
         // 預載音檔
         preloadAudio(sounds);
         
-        console.log("應用程式初始化完成");
+        console.log("奶茶按鈕應用程式初始化完成");
         
       } catch (error) {
         console.error("初始化失敗:", error);
