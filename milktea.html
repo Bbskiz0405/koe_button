@@ -59,6 +59,8 @@
     .side-menu li { margin: 18px 0; }
     .side-menu a { display: block; color: var(--text-color); text-decoration: none; padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; }
     .side-menu a:hover { background: rgba(255,255,255,0.1); color: var(--secondary-color); transform: translateX(5px); }
+    .menu-gif-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: -1; }
+    .menu-gif { height: 120px; width: auto; opacity: 0.4; pointer-events: none; }
 
     /* ===== Main Content & Card Layout ===== */
     .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: calc(var(--header-height) + 5vh) 24px 5vh 24px; width: 100%; }
@@ -312,6 +314,9 @@
       <li><a href="about.html">關於網站</a></li>
       <li><a href="admin.html">管理後台</a></li>
     </ul>
+    <div class="menu-gif-container">
+      <img src="toolimg/高飛摳.gif" alt="高飛摳" class="menu-gif">
+    </div>
   </div>
 
   <!-- 主要內容 -->
