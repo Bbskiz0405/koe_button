@@ -891,8 +891,8 @@
     function updateVolumeDisplay(rmsDb, peakDb) {
       currentVolumeDisplay.textContent = `${rmsDb.toFixed(1)} dB (峰值: ${peakDb.toFixed(1)} dB)`;
 
-      // 計算建議調整值 (目標: -18dB RMS，更保守的目標避免失真)
-      const targetDb = -18;
+      // 計算建議調整值 (目標: -20dB RMS，更保守的目標避免失真)
+      const targetDb = -20;
       const recommendedAdjustment = targetDb - rmsDb;
       
       let recommendationText = '';
@@ -1129,7 +1129,7 @@
     // 自動標準化按鈕
     autoNormalizeBtn.addEventListener('click', function() {
       if (currentVolumeLevel !== 0) {
-        const targetDb = -18; // 使用更保守的目標值
+        const targetDb = -20; // 使用更保守的目標值
         const recommendedAdjustment = targetDb - currentVolumeLevel;
 
         // 限制調整範圍在 -20 到 +12 dB，避免過度放大
@@ -1836,7 +1836,7 @@
         batchNormalizeBtn.disabled = true;
         batchNormalizeBtn.textContent = '處理中...';
 
-        const targetDb = -18; // 目標音量 (更保守，避免失真)
+        const targetDb = -20; // 目標音量 (更保守，避免失真)
         let processed = 0;
         let skipped = 0;
         let failed = 0;
