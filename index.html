@@ -268,7 +268,7 @@
     }
 
     .fab-container.active .fab-content {
-      height: 280px; /* Expanded height */
+      height: 360px; /* Expanded height - increased for better spacing */
       width: 72px; /* Slightly wider */
       border-radius: 36px; /* Stadium shape */
     }
@@ -363,7 +363,7 @@
       border: none;
     }
 
-    .random-button {
+    .random-button, .play-pause-button {
       background: none;
       border: none;
       color: var(--text-color);
@@ -373,9 +373,14 @@
       gap: 8px;
       cursor: pointer;
       font-size: 0.8rem;
+      transition: transform 0.2s ease;
     }
 
-    .random-button .fab-icon {
+    .random-button:hover, .play-pause-button:hover {
+      transform: scale(1.1);
+    }
+
+    .random-button .fab-icon, .play-pause-button .fab-icon {
       width: 28px;
       height: 28px;
     }
@@ -684,11 +689,13 @@
           if (visualizer) visualizer.classList.remove('active');
           currentAudio = null;
           currentButton = null;
+          updatePlayPauseIcon(false);
         };
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
+              updatePlayPauseIcon(true);
               const visualizer = document.getElementById('visualizer');
               if (visualizer) {
                 visualizer.classList.add('active');
@@ -853,6 +860,7 @@
       const fabToggle = document.getElementById('fabToggle');
       const volumeSlider = document.getElementById('volumeSlider');
       const randomPlayBtn = document.getElementById('randomPlayBtn');
+      const playPauseBtn = document.getElementById('playPauseBtn');
 
       if (fabToggle) {
         fabToggle.addEventListener('click', () => {
@@ -868,6 +876,68 @@
 
       if (randomPlayBtn) {
         randomPlayBtn.addEventListener('click', playRandomSound);
+      }
+
+      if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', togglePlayPause);
+      }
+    }
+
+    // 播放/暫停切換功能
+    function togglePlayPause() {
+      const playIcon = document.querySelector('.play-icon');
+      const pauseIcon = document.querySelector('.pause-icon');
+
+      if (!currentAudio) {
+        // 沒有音檔在播放，不執行任何操作
+        console.log('沒有音檔可以播放或暫停');
+        return;
+      }
+
+      if (currentAudio.paused) {
+        // 繼續播放
+        currentAudio.play().then(() => {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+          if (currentButton) {
+            currentButton.classList.add('playing');
+          }
+          const visualizer = document.getElementById('visualizer');
+          if (visualizer) {
+            visualizer.classList.add('active');
+            animateVisualizer();
+          }
+        }).catch(error => {
+          console.error('播放失敗:', error);
+        });
+      } else {
+        // 暫停播放
+        currentAudio.pause();
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        if (currentButton) {
+          currentButton.classList.remove('playing');
+        }
+        const visualizer = document.getElementById('visualizer');
+        if (visualizer) {
+          visualizer.classList.remove('active');
+        }
+      }
+    }
+
+    // 更新播放狀態圖示
+    function updatePlayPauseIcon(isPlaying) {
+      const playIcon = document.querySelector('.play-icon');
+      const pauseIcon = document.querySelector('.pause-icon');
+
+      if (playIcon && pauseIcon) {
+        if (isPlaying) {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+        } else {
+          playIcon.style.display = 'block';
+          pauseIcon.style.display = 'none';
+        }
       }
     }
 
@@ -929,6 +999,18 @@
             <div class="volume-slider-wrapper">
               <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider vertical" id="volumeSlider">
             </div>
+          </div>
+          <!-- Play/Pause Button -->
+          <div class="fab-option-item">
+            <button class="play-pause-button" id="playPauseBtn" aria-label="Play/Pause Sound">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon play-icon">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon pause-icon" style="display: none;">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
           </div>
           <!-- Random Button -->
           <div class="fab-option-item">

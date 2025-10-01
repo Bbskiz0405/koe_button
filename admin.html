@@ -890,19 +890,24 @@
     // 更新音量顯示
     function updateVolumeDisplay(rmsDb, peakDb) {
       currentVolumeDisplay.textContent = `${rmsDb.toFixed(1)} dB (峰值: ${peakDb.toFixed(1)} dB)`;
-      
-      // 計算建議調整值 (目標: -12dB RMS)
-      const targetDb = -12;
+
+      // 計算建議調整值 (目標: -18dB RMS，更保守的目標避免失真)
+      const targetDb = -18;
       const recommendedAdjustment = targetDb - rmsDb;
       
       let recommendationText = '';
       let recommendationColor = '';
       
-      if (Math.abs(recommendedAdjustment) < 1) {
+      if (Math.abs(recommendedAdjustment) < 2) {
         recommendationText = '音量適中 ✓';
         recommendationColor = 'var(--success-color)';
       } else if (recommendedAdjustment > 0) {
-        recommendationText = `建議提高 ${recommendedAdjustment.toFixed(1)} dB`;
+        // 限制最大提升量，避免過度放大
+        const safeAdjustment = Math.min(recommendedAdjustment, 12);
+        recommendationText = `建議提高 ${safeAdjustment.toFixed(1)} dB`;
+        if (recommendedAdjustment > 12) {
+          recommendationText += ` (已限制，原建議 ${recommendedAdjustment.toFixed(1)} dB)`;
+        }
         recommendationColor = 'var(--warning-color)';
       } else {
         recommendationText = `建議降低 ${Math.abs(recommendedAdjustment).toFixed(1)} dB`;
@@ -1124,11 +1129,11 @@
     // 自動標準化按鈕
     autoNormalizeBtn.addEventListener('click', function() {
       if (currentVolumeLevel !== 0) {
-        const targetDb = -12;
+        const targetDb = -18; // 使用更保守的目標值
         const recommendedAdjustment = targetDb - currentVolumeLevel;
-        
-        // 限制調整範圍在 -20 到 +20 dB
-        const clampedAdjustment = Math.max(-20, Math.min(20, recommendedAdjustment));
+
+        // 限制調整範圍在 -20 到 +12 dB，避免過度放大
+        const clampedAdjustment = Math.max(-20, Math.min(12, recommendedAdjustment));
         
         volumeSlider.value = clampedAdjustment;
         volumeAdjustment = clampedAdjustment;
@@ -1139,7 +1144,11 @@
           applyVolumeAdjustment(volumeAdjustment);
         }
         
-        showStatus(`已自動調整音量至 ${clampedAdjustment.toFixed(1)} dB`, 'success');
+        let statusMsg = `已自動調整音量至 ${clampedAdjustment.toFixed(1)} dB`;
+        if (recommendedAdjustment > 12) {
+          statusMsg += ` (已限制最大提升量，避免失真)`;
+        }
+        showStatus(statusMsg, 'success');
       }
     });
 
@@ -1826,8 +1835,8 @@
       try {
         batchNormalizeBtn.disabled = true;
         batchNormalizeBtn.textContent = '處理中...';
-        
-        const targetDb = -12; // 目標音量
+
+        const targetDb = -18; // 目標音量 (更保守，避免失真)
         let processed = 0;
         let skipped = 0;
         let failed = 0;
@@ -1864,16 +1873,19 @@
             
             // 計算需要的調整量
             const adjustment = targetDb - rmsDb;
-            
+
+            // 限制最大提升量，避免過度放大
+            const safeAdjustment = adjustment > 0 ? Math.min(adjustment, 12) : adjustment;
+
             // 如果調整量很小，跳過
-            if (Math.abs(adjustment) < 1) {
+            if (Math.abs(safeAdjustment) < 2) {
               console.log(`跳過 ${sound.description}: 音量已經適中 (${rmsDb.toFixed(1)} dB)`);
               skipped++;
               continue;
             }
             
-            // 應用音量調整
-            const gainLinear = Math.pow(10, adjustment / 20);
+            // 應用音量調整 (使用安全的調整量)
+            const gainLinear = Math.pow(10, safeAdjustment / 20);
             const adjustedBuffer = audioContext.createBuffer(
               audioBuffer.numberOfChannels,
               audioBuffer.length,
@@ -1910,7 +1922,7 @@
               downloadUrl: downloadURL,
               volumeProcessing: {
                 originalVolume: rmsDb.toFixed(1),
-                adjustment: adjustment.toFixed(1),
+                adjustment: safeAdjustment.toFixed(1),
                 processed: true,
                 processedAt: window.firebase.serverTimestamp()
               }
@@ -1927,7 +1939,7 @@
             }
             
             processed++;
-            console.log(`✓ 處理完成: ${sound.description} (調整 ${adjustment.toFixed(1)} dB)`);
+            console.log(`✓ 處理完成: ${sound.description} (調整 ${safeAdjustment.toFixed(1)} dB)`);
             
             // 小延遲避免請求過於頻繁
             await new Promise(resolve => setTimeout(resolve, 500));
