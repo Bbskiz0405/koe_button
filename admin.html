@@ -1850,15 +1850,14 @@
           try {
             showStatus(`處理中 (${processed + skipped + failed + 1}/${currentSounds.length}): ${sound.description}`, 'success');
             
-            // 使用 Firebase Storage 直接下載（避免 CORS 問題）
-            const storagePath = sound.type === 'yawn' ? 'sounds' : 'milktea';
-            const storageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${sound.fileName}`);
-
+            // 下載原音檔
             let arrayBuffer;
             try {
-              // 使用 Firebase getBlob 方法
-              const blob = await window.firebase.getBlob(storageRef);
-              arrayBuffer = await blob.arrayBuffer();
+              const response = await fetch(sound.downloadUrl);
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              arrayBuffer = await response.arrayBuffer();
             } catch (downloadError) {
               console.warn(`無法下載音檔: ${sound.fileName}`, downloadError);
               failed++;

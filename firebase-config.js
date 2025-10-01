@@ -13,7 +13,7 @@ const firebaseConfig = {
 // 初始化 Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, getBlob } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
 const app = initializeApp(firebaseConfig);
@@ -37,7 +37,6 @@ window.firebase = {
   uploadBytes,
   getDownloadURL,
   deleteObject,
-  getBlob,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged
