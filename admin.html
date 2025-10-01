@@ -894,8 +894,8 @@
     function updateVolumeDisplay(rmsDb, peakDb) {
       currentVolumeDisplay.textContent = `${rmsDb.toFixed(1)} dB (峰值: ${peakDb.toFixed(1)} dB)`;
 
-      // 計算建議調整值 (目標: -24dB RMS，更保守的目標避免失真)
-      const targetDb = -24;
+      // 計算建議調整值 (目標: -28dB RMS，更保守的目標避免失真)
+      const targetDb = -28;
       const recommendedAdjustment = targetDb - rmsDb;
       
       let recommendationText = '';
@@ -1160,7 +1160,7 @@
     // 自動標準化按鈕
     autoNormalizeBtn.addEventListener('click', function() {
       if (currentVolumeLevel !== 0) {
-        const targetDb = -24; // 使用更保守的目標值
+        const targetDb = -28; // 使用更保守的目標值
         const recommendedAdjustment = targetDb - currentVolumeLevel;
 
         // 限制調整範圍在 -20 到 +12 dB，避免過度放大
@@ -1889,7 +1889,7 @@
         batchNormalizeBtn.disabled = true;
         batchNormalizeBtn.textContent = '處理中...';
 
-        const targetDb = -24; // 目標音量 (更保守，避免失真)
+        const targetDb = -28; // 目標音量 (更保守，避免失真)
         let processed = 0;
         let skipped = 0;
         let failed = 0;
@@ -2047,7 +2047,7 @@
         showStatus(resultMsg, 'success');
 
         // 顯示詳細的彈窗訊息
-        let alertMsg = `批量音量標準化完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個（音量已在 -25 dB 到 -23 dB 範圍內）\n❌ 失敗：${failed} 個\n\n目標音量：-24 dB\n最大提升：+12 dB`;
+        let alertMsg = `批量音量標準化完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個（音量已在 -29 dB 到 -27 dB 範圍內）\n❌ 失敗：${failed} 個\n\n目標音量：-28 dB\n最大提升：+12 dB`;
 
         // 如果有失敗的音檔，顯示失敗原因
         if (failed > 0 && window.failedSounds && window.failedSounds.length > 0) {
@@ -2078,7 +2078,7 @@
         batchReuploadBtn.disabled = true;
         batchReuploadBtn.textContent = '處理中...';
 
-        const targetDb = -24; // 目標音量
+        const targetDb = -28; // 目標音量
         let processed = 0;
         let skipped = 0;
         let failed = 0;
@@ -2206,7 +2206,7 @@
         }
 
         // 顯示結果
-        let alertMsg = `批量重新上傳完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個\n❌ 失敗：${failed} 個\n\n目標音量：-24 dB\n最大提升：+12 dB`;
+        let alertMsg = `批量重新上傳完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個\n❌ 失敗：${failed} 個\n\n目標音量：-28 dB\n最大提升：+12 dB`;
 
         if (window.failedSounds.length > 0) {
           alertMsg += '\n\n失敗/跳過音檔：\n';
