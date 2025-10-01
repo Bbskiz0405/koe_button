@@ -1850,47 +1850,25 @@
           try {
             showStatus(`處理中 (${processed + skipped + failed + 1}/${currentSounds.length}): ${sound.description}`, 'success');
             
-            // 下載原音檔（加入重試機制）
-            let response;
-            let retryCount = 0;
-            const maxRetries = 3;
+            // 使用 Firebase Storage 直接下載（避免 CORS 問題）
+            const storagePath = sound.type === 'yawn' ? 'sounds' : 'milktea';
+            const storageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${sound.fileName}`);
 
-            while (retryCount < maxRetries) {
-              try {
-                response = await fetch(sound.downloadUrl, {
-                  mode: 'cors',
-                  credentials: 'omit'
-                });
-                if (response.ok) break;
-
-                console.warn(`下載失敗 (嘗試 ${retryCount + 1}/${maxRetries}): ${sound.fileName}`);
-                retryCount++;
-
-                if (retryCount < maxRetries) {
-                  await new Promise(resolve => setTimeout(resolve, 1000)); // 等待 1 秒後重試
-                }
-              } catch (fetchError) {
-                console.warn(`下載錯誤 (嘗試 ${retryCount + 1}/${maxRetries}):`, fetchError);
-                retryCount++;
-
-                if (retryCount < maxRetries) {
-                  await new Promise(resolve => setTimeout(resolve, 1000)); // 等待 1 秒後重試
-                }
-              }
-            }
-
-            if (!response || !response.ok) {
-              console.warn(`無法下載音檔 (已重試 ${maxRetries} 次): ${sound.fileName}`);
+            let arrayBuffer;
+            try {
+              // 使用 Firebase getBlob 方法
+              const blob = await window.firebase.getBlob(storageRef);
+              arrayBuffer = await blob.arrayBuffer();
+            } catch (downloadError) {
+              console.warn(`無法下載音檔: ${sound.fileName}`, downloadError);
               failed++;
               if (!window.failedSounds) window.failedSounds = [];
               window.failedSounds.push({
                 name: sound.description,
-                error: `下載失敗 (已重試 ${maxRetries} 次)`
+                error: `下載失敗: ${downloadError.message}`
               });
               continue;
             }
-            
-            const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
             
             // 分析音量
