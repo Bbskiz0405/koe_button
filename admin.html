@@ -1845,10 +1845,10 @@
         
         // 初始化 Audio Context
         initAudioContext();
-        
-        for (const sound of allSounds) {
+
+        for (const sound of currentSounds) {
           try {
-            showStatus(`處理中 (${processed + skipped + failed + 1}/${allSounds.length}): ${sound.description}`, 'success');
+            showStatus(`處理中 (${processed + skipped + failed + 1}/${currentSounds.length}): ${sound.description}`, 'success');
             
             // 下載原音檔
             const response = await fetch(sound.downloadUrl);
@@ -1911,13 +1911,17 @@
             const baseFileName = sound.fileName.replace(/\.[^/.]+$/, "");
             const newFileName = `${baseFileName}.wav`;
             
-            // 上傳處理後的音檔
-            const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${newFileName}`);
+            // 根據音檔類型決定 Storage 路徑
+            const storagePath = sound.type === 'yawn' ? 'sounds' : 'milktea';
+            const storageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${newFileName}`);
             const uploadResult = await window.firebase.uploadBytes(storageRef, processedBlob);
             const downloadURL = await window.firebase.getDownloadURL(uploadResult.ref);
             
+            // 根據音檔類型決定 Collection 名稱
+            const collectionName = sound.type === 'yawn' ? 'sounds' : 'milktea_sounds';
+
             // 更新 Firestore 記錄
-            await window.firebase.updateDoc(window.firebase.doc(window.firebase.db, 'sounds', sound.id), {
+            await window.firebase.updateDoc(window.firebase.doc(window.firebase.db, collectionName, sound.id), {
               fileName: newFileName,
               downloadUrl: downloadURL,
               volumeProcessing: {
@@ -1931,7 +1935,7 @@
             // 如果檔名改變了，刪除舊檔案
             if (newFileName !== sound.fileName) {
               try {
-                const oldStorageRef = window.firebase.ref(window.firebase.storage, `sounds/${sound.fileName}`);
+                const oldStorageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${sound.fileName}`);
                 await window.firebase.deleteObject(oldStorageRef);
               } catch (deleteError) {
                 console.warn(`無法刪除舊檔案 ${sound.fileName}:`, deleteError);
