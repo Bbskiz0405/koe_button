@@ -1878,7 +1878,7 @@
             const safeAdjustment = adjustment > 0 ? Math.min(adjustment, 12) : adjustment;
 
             // 如果調整量很小，跳過
-            if (Math.abs(safeAdjustment) < 2) {
+            if (Math.abs(safeAdjustment) < 1) {
               console.log(`跳過 ${sound.description}: 音量已經適中 (${rmsDb.toFixed(1)} dB)`);
               skipped++;
               continue;
@@ -1954,7 +1954,11 @@
           }
         }
         
-        showStatus(`批量標準化完成！處理：${processed} 個，跳過：${skipped} 個，失敗：${failed} 個`, 'success');
+        const resultMsg = `批量標準化完成！\n處理：${processed} 個\n跳過：${skipped} 個（音量已適中）\n失敗：${failed} 個`;
+        showStatus(resultMsg, 'success');
+
+        // 顯示詳細的彈窗訊息
+        alert(`批量音量標準化完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個（音量已在 -21 dB 到 -19 dB 範圍內）\n❌ 失敗：${failed} 個\n\n目標音量：-20 dB\n最大提升：+12 dB`);
         
         // 重新載入列表
         await loadSoundsList();
