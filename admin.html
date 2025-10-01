@@ -1850,11 +1850,43 @@
           try {
             showStatus(`處理中 (${processed + skipped + failed + 1}/${currentSounds.length}): ${sound.description}`, 'success');
             
-            // 下載原音檔
-            const response = await fetch(sound.downloadUrl);
-            if (!response.ok) {
-              console.warn(`無法下載音檔: ${sound.fileName}`);
+            // 下載原音檔（加入重試機制）
+            let response;
+            let retryCount = 0;
+            const maxRetries = 3;
+
+            while (retryCount < maxRetries) {
+              try {
+                response = await fetch(sound.downloadUrl, {
+                  mode: 'cors',
+                  credentials: 'omit'
+                });
+                if (response.ok) break;
+
+                console.warn(`下載失敗 (嘗試 ${retryCount + 1}/${maxRetries}): ${sound.fileName}`);
+                retryCount++;
+
+                if (retryCount < maxRetries) {
+                  await new Promise(resolve => setTimeout(resolve, 1000)); // 等待 1 秒後重試
+                }
+              } catch (fetchError) {
+                console.warn(`下載錯誤 (嘗試 ${retryCount + 1}/${maxRetries}):`, fetchError);
+                retryCount++;
+
+                if (retryCount < maxRetries) {
+                  await new Promise(resolve => setTimeout(resolve, 1000)); // 等待 1 秒後重試
+                }
+              }
+            }
+
+            if (!response || !response.ok) {
+              console.warn(`無法下載音檔 (已重試 ${maxRetries} 次): ${sound.fileName}`);
               failed++;
+              if (!window.failedSounds) window.failedSounds = [];
+              window.failedSounds.push({
+                name: sound.description,
+                error: `下載失敗 (已重試 ${maxRetries} 次)`
+              });
               continue;
             }
             
@@ -1950,7 +1982,15 @@
             
           } catch (error) {
             console.error(`處理 ${sound.description} 失敗:`, error);
+            console.error('錯誤詳情:', error.message, error.stack);
             failed++;
+
+            // 記錄失敗原因
+            if (!window.failedSounds) window.failedSounds = [];
+            window.failedSounds.push({
+              name: sound.description,
+              error: error.message
+            });
           }
         }
         
@@ -1958,7 +1998,18 @@
         showStatus(resultMsg, 'success');
 
         // 顯示詳細的彈窗訊息
-        alert(`批量音量標準化完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個（音量已在 -21 dB 到 -19 dB 範圍內）\n❌ 失敗：${failed} 個\n\n目標音量：-20 dB\n最大提升：+12 dB`);
+        let alertMsg = `批量音量標準化完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個（音量已在 -21 dB 到 -19 dB 範圍內）\n❌ 失敗：${failed} 個\n\n目標音量：-20 dB\n最大提升：+12 dB`;
+
+        // 如果有失敗的音檔，顯示失敗原因
+        if (failed > 0 && window.failedSounds && window.failedSounds.length > 0) {
+          alertMsg += '\n\n失敗音檔：\n';
+          window.failedSounds.forEach(fs => {
+            alertMsg += `• ${fs.name}: ${fs.error}\n`;
+          });
+          window.failedSounds = []; // 清空記錄
+        }
+
+        alert(alertMsg);
         
         // 重新載入列表
         await loadSoundsList();
