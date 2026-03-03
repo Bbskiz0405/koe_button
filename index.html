@@ -49,7 +49,9 @@
     .loader { width: 48px; height: 48px; border: 5px solid var(--primary-color); border-bottom-color: transparent; border-radius: 50%; animation: rotation 1s linear infinite; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .main-header { position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height); background: var(--menu-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; z-index: 1001; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-    .site-title { font-size: 20px; font-weight: 700; margin: 0; background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+    .site-title { font-size: 20px; font-weight: 700; margin: 0; background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+    .title-gif { height: 32px; width: auto; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)); }
+    .bottom-right-gif { position: fixed; bottom: 20px; right: 20px; height: 180px; width: auto; opacity: 0.3; z-index: -1; pointer-events: none; }
     .menu-toggle { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; font-size: 24px; cursor: pointer; border-radius: 8px; transition: all var(--transition-speed) ease; background: transparent; border: 1px solid transparent; color: var(--text-color); }
     .menu-toggle:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
     .side-menu { position: fixed; top: var(--header-height); right: -300px; width: 280px; height: calc(100% - var(--header-height)); background: rgba(15, 15, 35, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: white; padding: 30px 20px; box-shadow: -4px 0 20px rgba(0,0,0,0.5); transition: right var(--transition-speed) ease-in-out; z-index: 1000; overflow-y: auto; }
@@ -59,6 +61,8 @@
     .side-menu li { margin: 18px 0; }
     .side-menu a { display: block; color: var(--text-color); text-decoration: none; padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; }
     .side-menu a:hover { background: rgba(255,255,255,0.1); color: var(--secondary-color); transform: translateX(5px); }
+    .menu-gif-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: -1; }
+    .menu-gif { height: 150px; width: auto; opacity: 0.4; pointer-events: none; }
 
     /* ===== Main Content & Card Layout ===== */
     .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: calc(var(--header-height) + 5vh) 24px 5vh 24px; width: 100%; }
@@ -264,7 +268,7 @@
     }
 
     .fab-container.active .fab-content {
-      height: 280px; /* Expanded height */
+      height: 360px; /* Expanded height - increased for better spacing */
       width: 72px; /* Slightly wider */
       border-radius: 36px; /* Stadium shape */
     }
@@ -359,7 +363,7 @@
       border: none;
     }
 
-    .random-button {
+    .random-button, .play-pause-button {
       background: none;
       border: none;
       color: var(--text-color);
@@ -369,9 +373,14 @@
       gap: 8px;
       cursor: pointer;
       font-size: 0.8rem;
+      transition: transform 0.2s ease;
     }
 
-    .random-button .fab-icon {
+    .random-button:hover, .play-pause-button:hover {
+      transform: scale(1.1);
+    }
+
+    .random-button .fab-icon, .play-pause-button .fab-icon {
       width: 28px;
       height: 28px;
     }
@@ -557,7 +566,10 @@
 
   <!-- 頭部 -->
   <header class="main-header">
-    <a href="index.html" class="site-title">心咲koe哈欠按鈕</a>
+    <a href="index.html" class="site-title">
+      <img src="toolimg/睡覺摳.gif" alt="睡覺摳" class="title-gif">
+      心咲koe哈欠按鈕
+    </a>
     <button class="menu-toggle" id="menuToggle" aria-label="開啟選單">☰</button>
   </header>
 
@@ -573,6 +585,9 @@
       <li><a href="about.html">關於網站</a></li>
       <li><a href="admin.html">管理後台</a></li>
     </ul>
+    <div class="menu-gif-container">
+      <img src="toolimg/米奇摳.gif" alt="米奇摳" class="menu-gif">
+    </div>
   </div>
 
   <!-- 主要內容 -->
@@ -623,7 +638,7 @@
     let audioFiles = {};
     let currentAudio = null;
     let currentButton = null;
-    let globalVolume = 1.0; // Default volume
+    let globalVolume = 0.5; // Default volume (50%)
 
     // ====================================================================
     //                          Volume Controls
@@ -667,11 +682,11 @@
           setVolume(parseFloat(savedVolume), false);
           console.log(`Loaded volume from localStorage: ${globalVolume}`);
         } else {
-          setVolume(1.0, false); // Default volume
+          setVolume(0.5, false); // Default volume (50%)
         }
       } catch (e) {
         console.warn('Could not load volume from localStorage:', e);
-        setVolume(1.0, false);
+        setVolume(0.5, false);
       }
     }
     
@@ -828,11 +843,13 @@
           if (visualizer) visualizer.classList.remove('active');
           currentAudio = null;
           currentButton = null;
+          updatePlayPauseIcon(false);
         };
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
+              updatePlayPauseIcon(true);
               const visualizer = document.getElementById('visualizer');
               if (visualizer) {
                 visualizer.classList.add('active');
@@ -997,6 +1014,7 @@
       const fabToggle = document.getElementById('fabToggle');
       const volumeSlider = document.getElementById('volumeSlider');
       const randomPlayBtn = document.getElementById('randomPlayBtn');
+      const playPauseBtn = document.getElementById('playPauseBtn');
 
       if (fabToggle) {
         fabToggle.addEventListener('click', () => {
@@ -1012,6 +1030,68 @@
 
       if (randomPlayBtn) {
         randomPlayBtn.addEventListener('click', playRandomSound);
+      }
+
+      if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', togglePlayPause);
+      }
+    }
+
+    // 播放/暫停切換功能
+    function togglePlayPause() {
+      const playIcon = document.querySelector('.play-icon');
+      const pauseIcon = document.querySelector('.pause-icon');
+
+      if (!currentAudio) {
+        // 沒有音檔在播放，不執行任何操作
+        console.log('沒有音檔可以播放或暫停');
+        return;
+      }
+
+      if (currentAudio.paused) {
+        // 繼續播放
+        currentAudio.play().then(() => {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+          if (currentButton) {
+            currentButton.classList.add('playing');
+          }
+          const visualizer = document.getElementById('visualizer');
+          if (visualizer) {
+            visualizer.classList.add('active');
+            animateVisualizer();
+          }
+        }).catch(error => {
+          console.error('播放失敗:', error);
+        });
+      } else {
+        // 暫停播放
+        currentAudio.pause();
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        if (currentButton) {
+          currentButton.classList.remove('playing');
+        }
+        const visualizer = document.getElementById('visualizer');
+        if (visualizer) {
+          visualizer.classList.remove('active');
+        }
+      }
+    }
+
+    // 更新播放狀態圖示
+    function updatePlayPauseIcon(isPlaying) {
+      const playIcon = document.querySelector('.play-icon');
+      const pauseIcon = document.querySelector('.pause-icon');
+
+      if (playIcon && pauseIcon) {
+        if (isPlaying) {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+        } else {
+          playIcon.style.display = 'block';
+          pauseIcon.style.display = 'none';
+        }
       }
     }
 
@@ -1071,8 +1151,20 @@
           <div class="fab-option-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
             <div class="volume-slider-wrapper">
-              <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider vertical" id="volumeSlider">
+              <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider vertical" id="volumeSlider">
             </div>
+          </div>
+          <!-- Play/Pause Button -->
+          <div class="fab-option-item">
+            <button class="play-pause-button" id="playPauseBtn" aria-label="Play/Pause Sound">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon play-icon">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon pause-icon" style="display: none;">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
           </div>
           <!-- Random Button -->
           <div class="fab-option-item">
@@ -1090,6 +1182,7 @@
       </div>
     </div>
 
+<<<<<<< HEAD
   <!-- ====== Birthday Script ====== -->
   <script>
   (function () {
@@ -1393,6 +1486,9 @@
     window.addEventListener('load', () => setTimeout(initLetter, 1400));
   })();
   </script>
+
+  <!-- 右下角背景大屁摳 -->
+  <img src="toolimg/大屁摳_玻璃.gif" alt="大屁摳" class="bottom-right-gif">
 
   </body>
 </html>

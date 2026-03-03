@@ -59,6 +59,8 @@
     .side-menu li { margin: 18px 0; }
     .side-menu a { display: block; color: var(--text-color); text-decoration: none; padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; }
     .side-menu a:hover { background: rgba(255,255,255,0.1); color: var(--secondary-color); transform: translateX(5px); }
+    .menu-gif-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: -1; }
+    .menu-gif { height: 120px; width: auto; opacity: 0.4; pointer-events: none; }
 
     /* ===== Main Content & Card Layout ===== */
     .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: calc(var(--header-height) + 5vh) 24px 5vh 24px; width: 100%; }
@@ -262,6 +264,162 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       }
 
+    /* 背景游泳摳 */
+    .center-background-gif {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      height: 300px;
+      width: auto;
+      opacity: 0.2;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* FAB Container 樣式 */
+    .fab-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1010;
+    }
+
+    .fab-content {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      background: rgba(75, 50, 35, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: all 0.4s ease-in-out;
+      overflow: hidden;
+    }
+
+    .fab-container.active .fab-content {
+      height: 360px; /* Expanded height - increased for better spacing */
+      width: 72px;
+      border-radius: 36px;
+    }
+
+    #fabToggle {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 56px;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    #fabToggle .fab-icon {
+      transition: transform 0.3s ease-in-out;
+      color: white;
+    }
+
+    .fab-container.active #fabToggle .fab-icon {
+      transform: rotate(180deg);
+    }
+
+    .fab-options {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      transition: opacity 0.3s ease-in-out 0.1s, transform 0.3s ease-in-out 0.1s;
+      opacity: 0;
+      transform: translateY(20px);
+      z-index: 2;
+    }
+
+    .fab-container.active .fab-options {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fab-option-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-color);
+    }
+
+    .volume-slider-wrapper {
+      width: 30px;
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .volume-slider.vertical {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      outline: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transform: rotate(-90deg);
+    }
+
+    .volume-slider.vertical::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--primary-color);
+      border-radius: 50%;
+    }
+
+    .volume-slider.vertical::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      border: none;
+    }
+
+    .random-button, .play-pause-button {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: transform 0.2s ease;
+    }
+
+    .random-button:hover, .play-pause-button:hover {
+      transform: scale(1.1);
+    }
+
+    .random-button .fab-icon, .play-pause-button .fab-icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    .fab-option-item .feather-volume-2 {
+      width: 28px;
+      height: 28px;
+    }
+
     </style>
 </head>
 <body>
@@ -300,6 +458,9 @@
       <li><a href="about.html">關於網站</a></li>
       <li><a href="admin.html">管理後台</a></li>
     </ul>
+    <div class="menu-gif-container">
+      <img src="toolimg/高飛摳.gif" alt="高飛摳" class="menu-gif">
+    </div>
   </div>
 
   <!-- 主要內容 -->
@@ -350,6 +511,66 @@
     let audioFiles = {};
     let currentAudio = null;
     let currentButton = null;
+    let globalVolume = 0.5; // Default volume (50%)
+
+    // ====================================================================
+    //                          Volume Controls
+    // ====================================================================
+
+    function setVolume(volume, fromSlider = true) {
+      globalVolume = parseFloat(volume);
+
+      // Update current audio if playing
+      if (currentAudio) {
+        currentAudio.volume = globalVolume;
+      }
+
+      // Update all preloaded audio objects
+      for (const soundId in audioFiles) {
+        if (audioFiles[soundId]) {
+          audioFiles[soundId].volume = globalVolume;
+        }
+      }
+
+      // Update slider if change didn't come from it
+      if (!fromSlider) {
+        const volumeSlider = document.getElementById('volumeSlider');
+        if (volumeSlider) {
+          volumeSlider.value = globalVolume;
+        }
+      }
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('milkteaButtonVolume', globalVolume);
+      } catch (e) {
+        console.warn('Could not save volume to localStorage:', e);
+      }
+    }
+
+    function loadVolume() {
+      try {
+        const savedVolume = localStorage.getItem('milkteaButtonVolume');
+        if (savedVolume !== null && !isNaN(savedVolume)) {
+          setVolume(parseFloat(savedVolume), false);
+          console.log(`Loaded volume from localStorage: ${globalVolume}`);
+        } else {
+          setVolume(0.5, false); // Default volume (50%)
+        }
+      } catch (e) {
+        console.warn('Could not load volume from localStorage:', e);
+        setVolume(0.5, false);
+      }
+    }
+
+    function setupVolumeControl() {
+        const volumeSlider = document.getElementById('volumeSlider');
+        if(volumeSlider) {
+            volumeSlider.addEventListener('input', (e) => {
+                setVolume(e.target.value);
+            });
+        }
+    }
 
     // ====================================================================
     //                          Function Definitions
@@ -434,7 +655,8 @@
         const soundId = `sound_${sound.id}`;
         audioFiles[soundId] = new Audio(sound.downloadUrl);
         audioFiles[soundId].preload = 'metadata';
-        
+        audioFiles[soundId].volume = globalVolume; // Set initial volume
+
         audioFiles[soundId].onerror = () => {
           console.error(`音檔載入失敗: ${sound.description}`);
           const button = document.querySelector(`[data-sound-id="${soundId}"]`);
@@ -481,6 +703,7 @@
         });
 
         // 播放新音檔
+        audio.volume = globalVolume; // Ensure volume is set before playing
         audio.currentTime = 0;
         currentAudio = audio;
         currentButton = button;
@@ -492,11 +715,13 @@
           if (visualizer) visualizer.classList.remove('active');
           currentAudio = null;
           currentButton = null;
+          updatePlayPauseIcon(false);
         };
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
+              updatePlayPauseIcon(true);
               const visualizer = document.getElementById('visualizer');
               if (visualizer) {
                 visualizer.classList.add('active');
@@ -606,9 +831,13 @@
       console.log("開始初始化奶茶按鈕應用程式...");
       
       try {
-        // 設定側邊選單
+        // 設定側邊選單和音量控制
         setupSideMenu();
-        
+        setupFabControls();
+
+        // 載入儲存的音量
+        loadVolume();
+
         // 載入音檔資料
         const sounds = await loadSoundsFromFirebase();
         
@@ -652,6 +881,92 @@
       }
     }
 
+    function setupFabControls() {
+      const fabContainer = document.getElementById('fabContainer');
+      const fabToggle = document.getElementById('fabToggle');
+      const volumeSlider = document.getElementById('volumeSlider');
+      const randomPlayBtn = document.getElementById('randomPlayBtn');
+      const playPauseBtn = document.getElementById('playPauseBtn');
+
+      if (fabToggle) {
+        fabToggle.addEventListener('click', () => {
+          fabContainer.classList.toggle('active');
+        });
+      }
+
+      if (volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => {
+          setVolume(e.target.value);
+        });
+      }
+
+      if (randomPlayBtn) {
+        randomPlayBtn.addEventListener('click', playRandomSound);
+      }
+
+      if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', togglePlayPause);
+      }
+    }
+
+    // 播放/暫停切換功能
+    function togglePlayPause() {
+      const playIcon = document.querySelector('.play-icon');
+      const pauseIcon = document.querySelector('.pause-icon');
+
+      if (!currentAudio) {
+        // 沒有音檔在播放，不執行任何操作
+        console.log('沒有音檔可以播放或暫停');
+        return;
+      }
+
+      if (currentAudio.paused) {
+        // 繼續播放
+        currentAudio.play().then(() => {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+          if (currentButton) {
+            currentButton.classList.add('playing');
+          }
+          const visualizer = document.getElementById('visualizer');
+          if (visualizer) {
+            visualizer.classList.add('active');
+            animateVisualizer();
+          }
+        }).catch(error => {
+          console.error('播放失敗:', error);
+        });
+      } else {
+        // 暫停播放
+        currentAudio.pause();
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        if (currentButton) {
+          currentButton.classList.remove('playing');
+        }
+        const visualizer = document.getElementById('visualizer');
+        if (visualizer) {
+          visualizer.classList.remove('active');
+        }
+      }
+    }
+
+    // 更新播放狀態圖示
+    function updatePlayPauseIcon(isPlaying) {
+      const playIcon = document.querySelector('.play-icon');
+      const pauseIcon = document.querySelector('.pause-icon');
+
+      if (playIcon && pauseIcon) {
+        if (isPlaying) {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+        } else {
+          playIcon.style.display = 'block';
+          pauseIcon.style.display = 'none';
+        }
+      }
+    }
+
     // DOM 載入完成後初始化
     document.addEventListener('DOMContentLoaded', () => {
       // 等待 Firebase 配置載入
@@ -682,20 +997,65 @@
       if (modal && event.target == modal) {
         modal.style.display = 'none';
       }
+
+      // 點擊 FAB 以外區域收合選單
+      const fabContainer = document.getElementById('fabContainer');
+      if (fabContainer && !fabContainer.contains(event.target)) {
+        fabContainer.classList.remove('active');
+      }
     };
-    
-    // 將 playRandomSound 函數設為全域，供 HTML 使用
+
+    // 將 playRandomSound 函數設為全域，供 HTML 使用 (現在由事件監聽器處理，此行可選)
     window.playRandomSound = playRandomSound;
   </script>
-    <button id="random-play-btn" class="fab" onclick="playRandomSound()" aria-label="Play Random Sound">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon">
-        <rect x="3" y="3" width="18" height="18" rx="3"></rect>
-        <circle cx="8" cy="8" r="1.5"></circle>
-        <circle cx="16" cy="16" r="1.5"></circle>
-        <circle cx="8" cy="16" r="1.5"></circle>
-        <circle cx="16" cy="8" r="1.5"></circle>
-      </svg>
-    </button>
+    <!-- FAB Container -->
+    <div class="fab-container" id="fabContainer">
+      <!-- This is the element that will animate -->
+      <div class="fab-content">
+        <!-- Toggle button is now inside, at the bottom -->
+        <button id="fabToggle" class="fab" aria-label="Toggle Options">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fab-icon feather feather-chevron-up"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        </button>
+
+        <!-- Options are now absolutely positioned and will fade in -->
+        <div class="fab-options" id="fabOptions">
+          <!-- Volume Control -->
+          <div class="fab-option-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <div class="volume-slider-wrapper">
+              <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider vertical" id="volumeSlider">
+            </div>
+          </div>
+          <!-- Play/Pause Button -->
+          <div class="fab-option-item">
+            <button class="play-pause-button" id="playPauseBtn" aria-label="Play/Pause Sound">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon play-icon">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon pause-icon" style="display: none;">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
+          </div>
+          <!-- Random Button -->
+          <div class="fab-option-item">
+            <button class="random-button" id="randomPlayBtn" aria-label="Play Random Sound">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="fab-icon">
+                <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+                <circle cx="8" cy="8" r="1.5"></circle>
+                <circle cx="16" cy="16" r="1.5"></circle>
+                <circle cx="8" cy="16" r="1.5"></circle>
+                <circle cx="16" cy="8" r="1.5"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- 背景游泳摳 -->
+  <img src="toolimg/游泳摳.gif" alt="游泳摳" class="center-background-gif">
 
   </body>
 </html>

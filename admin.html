@@ -622,8 +622,11 @@
           <button class="btn" id="exportBtn" style="background: var(--success-color); color: white;">
             📤 匯出清單
           </button>
-          <button class="btn" id="batchNormalizeBtn" style="background: var(--warning-color); color: white;">
+          <button class="btn" id="batchNormalizeBtn" style="background: var(--warning-color); color: white; display: none;">
             🔊 批量音量標準化
+          </button>
+          <button class="btn" id="batchReuploadBtn" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+            📁 批量重新上傳音檔
           </button>
         </div>
       </div>
@@ -890,19 +893,24 @@
     // 更新音量顯示
     function updateVolumeDisplay(rmsDb, peakDb) {
       currentVolumeDisplay.textContent = `${rmsDb.toFixed(1)} dB (峰值: ${peakDb.toFixed(1)} dB)`;
-      
-      // 計算建議調整值 (目標: -12dB RMS)
-      const targetDb = -12;
+
+      // 計算建議調整值 (目標: -28dB RMS，更保守的目標避免失真)
+      const targetDb = -28;
       const recommendedAdjustment = targetDb - rmsDb;
       
       let recommendationText = '';
       let recommendationColor = '';
       
-      if (Math.abs(recommendedAdjustment) < 1) {
+      if (Math.abs(recommendedAdjustment) < 2) {
         recommendationText = '音量適中 ✓';
         recommendationColor = 'var(--success-color)';
       } else if (recommendedAdjustment > 0) {
-        recommendationText = `建議提高 ${recommendedAdjustment.toFixed(1)} dB`;
+        // 限制最大提升量，避免過度放大
+        const safeAdjustment = Math.min(recommendedAdjustment, 12);
+        recommendationText = `建議提高 ${safeAdjustment.toFixed(1)} dB`;
+        if (recommendedAdjustment > 12) {
+          recommendationText += ` (已限制，原建議 ${recommendedAdjustment.toFixed(1)} dB)`;
+        }
         recommendationColor = 'var(--warning-color)';
       } else {
         recommendationText = `建議降低 ${Math.abs(recommendedAdjustment).toFixed(1)} dB`;
@@ -976,27 +984,55 @@
     }
 
     // 播放音檔預覽
-    function playAudioBuffer(buffer) {
-      if (!buffer || !audioContext) return;
-      
-      // 停止當前播放
-      if (audioContext.state === 'suspended') {
-        audioContext.resume();
+    async function playAudioBuffer(buffer) {
+      if (!buffer) {
+        showStatus('沒有音檔可以播放', 'error');
+        return;
       }
-      
-      const source = audioContext.createBufferSource();
-      source.buffer = buffer;
-      source.connect(audioContext.destination);
-      source.start();
-      
-      // 3秒後自動停止
-      setTimeout(() => {
-        try {
-          source.stop();
-        } catch (e) {
-          // 忽略已停止的錯誤
+
+      if (!audioContext) {
+        showStatus('AudioContext 未初始化', 'error');
+        return;
+      }
+
+      try {
+        // 恢復 AudioContext（瀏覽器可能會暫停）
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+          console.log('AudioContext 已恢復');
         }
-      }, 3000);
+
+        // 創建音源和增益節點（用於控制音量）
+        const source = audioContext.createBufferSource();
+        const gainNode = audioContext.createGain();
+
+        source.buffer = buffer;
+        gainNode.gain.value = 1.0; // 設定音量為 100%
+
+        // 連接：音源 → 增益 → 輸出
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // 開始播放
+        source.start();
+        console.log('開始播放音檔，長度:', buffer.duration, '秒');
+        showStatus(`正在播放... (${buffer.duration.toFixed(1)} 秒)`, 'success');
+
+        // 播放完整音檔或最多 10 秒
+        const playDuration = Math.min(buffer.duration, 10) * 1000;
+        setTimeout(() => {
+          try {
+            source.stop();
+            showStatus('播放完成', 'success');
+          } catch (e) {
+            console.warn('停止播放時發生錯誤:', e);
+          }
+        }, playDuration);
+
+      } catch (error) {
+        console.error('播放失敗:', error);
+        showStatus('播放失敗: ' + error.message, 'error');
+      }
     }
 
     // 將 AudioBuffer 轉換為 Blob
@@ -1124,11 +1160,11 @@
     // 自動標準化按鈕
     autoNormalizeBtn.addEventListener('click', function() {
       if (currentVolumeLevel !== 0) {
-        const targetDb = -12;
+        const targetDb = -28; // 使用更保守的目標值
         const recommendedAdjustment = targetDb - currentVolumeLevel;
-        
-        // 限制調整範圍在 -20 到 +20 dB
-        const clampedAdjustment = Math.max(-20, Math.min(20, recommendedAdjustment));
+
+        // 限制調整範圍在 -20 到 +12 dB，避免過度放大
+        const clampedAdjustment = Math.max(-20, Math.min(12, recommendedAdjustment));
         
         volumeSlider.value = clampedAdjustment;
         volumeAdjustment = clampedAdjustment;
@@ -1139,7 +1175,11 @@
           applyVolumeAdjustment(volumeAdjustment);
         }
         
-        showStatus(`已自動調整音量至 ${clampedAdjustment.toFixed(1)} dB`, 'success');
+        let statusMsg = `已自動調整音量至 ${clampedAdjustment.toFixed(1)} dB`;
+        if (recommendedAdjustment > 12) {
+          statusMsg += ` (已限制最大提升量，避免失真)`;
+        }
+        showStatus(statusMsg, 'success');
       }
     });
 
@@ -1782,8 +1822,30 @@
       if (!confirm('這將會對所有音檔進行音量標準化處理，可能需要較長時間。確定要繼續嗎？\n\n注意：這會重新處理並上傳所有音檔。')) {
         return;
       }
-      
+
       await batchNormalizeAudio();
+    });
+
+    // 批量重新上傳音檔功能
+    batchReuploadBtn.addEventListener('click', async function() {
+      // 創建隱藏的檔案選擇器
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.multiple = true;
+      fileInput.accept = 'audio/*';
+
+      fileInput.onchange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        if (!confirm(`你選擇了 ${files.length} 個音檔。\n\n系統將會：\n1. 根據檔名匹配現有記錄\n2. 自動標準化音量到 -20 dB\n3. 重新上傳並更新音檔\n4. 保留原有的描述、直播時間等資訊\n\n確定要繼續嗎？`)) {
+          return;
+        }
+
+        await batchReuploadAudio(files);
+      };
+
+      fileInput.click();
     });
     
     // 生成 CSV 內容
@@ -1826,8 +1888,8 @@
       try {
         batchNormalizeBtn.disabled = true;
         batchNormalizeBtn.textContent = '處理中...';
-        
-        const targetDb = -12; // 目標音量
+
+        const targetDb = -28; // 目標音量 (更保守，避免失真)
         let processed = 0;
         let skipped = 0;
         let failed = 0;
@@ -1836,20 +1898,48 @@
         
         // 初始化 Audio Context
         initAudioContext();
-        
-        for (const sound of allSounds) {
+
+        for (const sound of currentSounds) {
           try {
-            showStatus(`處理中 (${processed + skipped + failed + 1}/${allSounds.length}): ${sound.description}`, 'success');
+            showStatus(`處理中 (${processed + skipped + failed + 1}/${currentSounds.length}): ${sound.description}`, 'success');
             
-            // 下載原音檔
-            const response = await fetch(sound.downloadUrl);
-            if (!response.ok) {
-              console.warn(`無法下載音檔: ${sound.fileName}`);
+            // 下載原音檔（使用 XMLHttpRequest 避免某些 CORS 問題）
+            let arrayBuffer;
+            try {
+              arrayBuffer = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', sound.downloadUrl, true);
+                xhr.responseType = 'arraybuffer';
+
+                xhr.onload = function() {
+                  if (xhr.status === 200) {
+                    resolve(xhr.response);
+                  } else {
+                    reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+                  }
+                };
+
+                xhr.onerror = function() {
+                  reject(new Error('網路錯誤或 CORS 限制'));
+                };
+
+                xhr.ontimeout = function() {
+                  reject(new Error('下載超時'));
+                };
+
+                xhr.timeout = 30000; // 30 秒超時
+                xhr.send();
+              });
+            } catch (downloadError) {
+              console.warn(`無法下載音檔: ${sound.fileName}`, downloadError);
               failed++;
+              if (!window.failedSounds) window.failedSounds = [];
+              window.failedSounds.push({
+                name: sound.description,
+                error: `下載失敗: ${downloadError.message}`
+              });
               continue;
             }
-            
-            const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
             
             // 分析音量
@@ -1864,16 +1954,19 @@
             
             // 計算需要的調整量
             const adjustment = targetDb - rmsDb;
-            
+
+            // 限制最大提升量，避免過度放大
+            const safeAdjustment = adjustment > 0 ? Math.min(adjustment, 12) : adjustment;
+
             // 如果調整量很小，跳過
-            if (Math.abs(adjustment) < 1) {
+            if (Math.abs(safeAdjustment) < 1) {
               console.log(`跳過 ${sound.description}: 音量已經適中 (${rmsDb.toFixed(1)} dB)`);
               skipped++;
               continue;
             }
             
-            // 應用音量調整
-            const gainLinear = Math.pow(10, adjustment / 20);
+            // 應用音量調整 (使用安全的調整量)
+            const gainLinear = Math.pow(10, safeAdjustment / 20);
             const adjustedBuffer = audioContext.createBuffer(
               audioBuffer.numberOfChannels,
               audioBuffer.length,
@@ -1899,18 +1992,22 @@
             const baseFileName = sound.fileName.replace(/\.[^/.]+$/, "");
             const newFileName = `${baseFileName}.wav`;
             
-            // 上傳處理後的音檔
-            const storageRef = window.firebase.ref(window.firebase.storage, `sounds/${newFileName}`);
+            // 根據音檔類型決定 Storage 路徑
+            const storagePath = sound.type === 'yawn' ? 'sounds' : 'milktea';
+            const storageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${newFileName}`);
             const uploadResult = await window.firebase.uploadBytes(storageRef, processedBlob);
             const downloadURL = await window.firebase.getDownloadURL(uploadResult.ref);
             
+            // 根據音檔類型決定 Collection 名稱
+            const collectionName = sound.type === 'yawn' ? 'sounds' : 'milktea_sounds';
+
             // 更新 Firestore 記錄
-            await window.firebase.updateDoc(window.firebase.doc(window.firebase.db, 'sounds', sound.id), {
+            await window.firebase.updateDoc(window.firebase.doc(window.firebase.db, collectionName, sound.id), {
               fileName: newFileName,
               downloadUrl: downloadURL,
               volumeProcessing: {
                 originalVolume: rmsDb.toFixed(1),
-                adjustment: adjustment.toFixed(1),
+                adjustment: safeAdjustment.toFixed(1),
                 processed: true,
                 processedAt: window.firebase.serverTimestamp()
               }
@@ -1919,7 +2016,7 @@
             // 如果檔名改變了，刪除舊檔案
             if (newFileName !== sound.fileName) {
               try {
-                const oldStorageRef = window.firebase.ref(window.firebase.storage, `sounds/${sound.fileName}`);
+                const oldStorageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${sound.fileName}`);
                 await window.firebase.deleteObject(oldStorageRef);
               } catch (deleteError) {
                 console.warn(`無法刪除舊檔案 ${sound.fileName}:`, deleteError);
@@ -1927,18 +2024,41 @@
             }
             
             processed++;
-            console.log(`✓ 處理完成: ${sound.description} (調整 ${adjustment.toFixed(1)} dB)`);
+            console.log(`✓ 處理完成: ${sound.description} (調整 ${safeAdjustment.toFixed(1)} dB)`);
             
             // 小延遲避免請求過於頻繁
             await new Promise(resolve => setTimeout(resolve, 500));
             
           } catch (error) {
             console.error(`處理 ${sound.description} 失敗:`, error);
+            console.error('錯誤詳情:', error.message, error.stack);
             failed++;
+
+            // 記錄失敗原因
+            if (!window.failedSounds) window.failedSounds = [];
+            window.failedSounds.push({
+              name: sound.description,
+              error: error.message
+            });
           }
         }
         
-        showStatus(`批量標準化完成！處理：${processed} 個，跳過：${skipped} 個，失敗：${failed} 個`, 'success');
+        const resultMsg = `批量標準化完成！\n處理：${processed} 個\n跳過：${skipped} 個（音量已適中）\n失敗：${failed} 個`;
+        showStatus(resultMsg, 'success');
+
+        // 顯示詳細的彈窗訊息
+        let alertMsg = `批量音量標準化完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個（音量已在 -29 dB 到 -27 dB 範圍內）\n❌ 失敗：${failed} 個\n\n目標音量：-28 dB\n最大提升：+12 dB`;
+
+        // 如果有失敗的音檔，顯示失敗原因
+        if (failed > 0 && window.failedSounds && window.failedSounds.length > 0) {
+          alertMsg += '\n\n失敗音檔：\n';
+          window.failedSounds.forEach(fs => {
+            alertMsg += `• ${fs.name}: ${fs.error}\n`;
+          });
+          window.failedSounds = []; // 清空記錄
+        }
+
+        alert(alertMsg);
         
         // 重新載入列表
         await loadSoundsList();
@@ -1949,6 +2069,165 @@
       } finally {
         batchNormalizeBtn.disabled = false;
         batchNormalizeBtn.textContent = '🔊 批量音量標準化';
+      }
+    }
+
+    // 批量重新上傳音檔處理
+    async function batchReuploadAudio(files) {
+      try {
+        batchReuploadBtn.disabled = true;
+        batchReuploadBtn.textContent = '處理中...';
+
+        const targetDb = -28; // 目標音量
+        let processed = 0;
+        let skipped = 0;
+        let failed = 0;
+        window.failedSounds = [];
+
+        showStatus('開始批量重新上傳處理...', 'success');
+
+        // 初始化 Audio Context
+        initAudioContext();
+
+        for (const file of files) {
+          try {
+            showStatus(`處理中 (${processed + skipped + failed + 1}/${files.length}): ${file.name}`, 'success');
+
+            // 根據檔名尋找匹配的記錄
+            const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+            const matchedSound = currentSounds.find(sound => {
+              const soundFileNameWithoutExt = sound.fileName.replace(/\.[^/.]+$/, "");
+              return soundFileNameWithoutExt === fileNameWithoutExt;
+            });
+
+            if (!matchedSound) {
+              console.warn(`找不到匹配的記錄: ${file.name}`);
+              skipped++;
+              window.failedSounds.push({
+                name: file.name,
+                error: '找不到匹配的資料庫記錄'
+              });
+              continue;
+            }
+
+            console.log(`匹配成功: ${file.name} → ${matchedSound.description}`);
+
+            // 讀取音檔
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            // 分析音量
+            const channelData = audioBuffer.getChannelData(0);
+            let sum = 0;
+            for (let i = 0; i < channelData.length; i++) {
+              const sample = Math.abs(channelData[i]);
+              sum += sample * sample;
+            }
+            const rms = Math.sqrt(sum / channelData.length);
+            const rmsDb = 20 * Math.log10(rms);
+
+            // 計算需要的調整量
+            const adjustment = targetDb - rmsDb;
+            const safeAdjustment = adjustment > 0 ? Math.min(adjustment, 12) : adjustment;
+
+            console.log(`${file.name}: 原音量 ${rmsDb.toFixed(1)} dB, 調整 ${safeAdjustment.toFixed(1)} dB`);
+
+            // 應用音量調整
+            const gainLinear = Math.pow(10, safeAdjustment / 20);
+            const adjustedBuffer = audioContext.createBuffer(
+              audioBuffer.numberOfChannels,
+              audioBuffer.length,
+              audioBuffer.sampleRate
+            );
+
+            for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+              const originalData = audioBuffer.getChannelData(channel);
+              const adjustedData = adjustedBuffer.getChannelData(channel);
+
+              for (let i = 0; i < originalData.length; i++) {
+                adjustedData[i] = originalData[i] * gainLinear;
+                // 防止削波
+                if (adjustedData[i] > 1) adjustedData[i] = 1;
+                if (adjustedData[i] < -1) adjustedData[i] = -1;
+              }
+            }
+
+            // 轉換為 Blob
+            const processedBlob = await audioBufferToBlob(adjustedBuffer);
+
+            // 生成新檔名（改為 .wav）
+            const newFileName = `${fileNameWithoutExt}.wav`;
+
+            // 根據音檔類型決定 Storage 路徑
+            const storagePath = matchedSound.type === 'yawn' ? 'sounds' : 'milktea';
+            const storageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${newFileName}`);
+            const uploadResult = await window.firebase.uploadBytes(storageRef, processedBlob);
+            const downloadURL = await window.firebase.getDownloadURL(uploadResult.ref);
+
+            // 根據音檔類型決定 Collection 名稱
+            const collectionName = matchedSound.type === 'yawn' ? 'sounds' : 'milktea_sounds';
+
+            // 更新 Firestore 記錄（保留原有資訊，只更新音檔相關欄位）
+            await window.firebase.updateDoc(window.firebase.doc(window.firebase.db, collectionName, matchedSound.id), {
+              fileName: newFileName,
+              downloadUrl: downloadURL,
+              volumeProcessing: {
+                originalVolume: rmsDb.toFixed(1),
+                adjustment: safeAdjustment.toFixed(1),
+                processed: true,
+                processedAt: window.firebase.serverTimestamp()
+              }
+            });
+
+            // 刪除舊檔案（如果檔名不同）
+            if (newFileName !== matchedSound.fileName) {
+              try {
+                const oldStorageRef = window.firebase.ref(window.firebase.storage, `${storagePath}/${matchedSound.fileName}`);
+                await window.firebase.deleteObject(oldStorageRef);
+              } catch (deleteError) {
+                console.warn(`無法刪除舊檔案 ${matchedSound.fileName}:`, deleteError);
+              }
+            }
+
+            processed++;
+            console.log(`✓ 處理完成: ${file.name} (調整 ${safeAdjustment.toFixed(1)} dB)`);
+
+            // 小延遲避免請求過於頻繁
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+          } catch (error) {
+            console.error(`處理 ${file.name} 失敗:`, error);
+            failed++;
+            window.failedSounds.push({
+              name: file.name,
+              error: error.message
+            });
+          }
+        }
+
+        // 顯示結果
+        let alertMsg = `批量重新上傳完成！\n\n✅ 成功處理：${processed} 個音檔\n⏭️ 跳過：${skipped} 個\n❌ 失敗：${failed} 個\n\n目標音量：-28 dB\n最大提升：+12 dB`;
+
+        if (window.failedSounds.length > 0) {
+          alertMsg += '\n\n失敗/跳過音檔：\n';
+          window.failedSounds.forEach(fs => {
+            alertMsg += `• ${fs.name}: ${fs.error}\n`;
+          });
+          window.failedSounds = [];
+        }
+
+        alert(alertMsg);
+        showStatus(`批量重新上傳完成！成功：${processed} 個`, 'success');
+
+        // 重新載入列表
+        await loadSoundsList();
+
+      } catch (error) {
+        console.error('批量重新上傳失敗:', error);
+        showStatus('批量重新上傳失敗：' + error.message, 'error');
+      } finally {
+        batchReuploadBtn.disabled = false;
+        batchReuploadBtn.textContent = '📁 批量重新上傳音檔';
       }
     }
     
