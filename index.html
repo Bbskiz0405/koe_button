@@ -381,6 +381,137 @@
       height: 28px;
     }
 
+    /* ===== Birthday Features (3/6 - 3/8) ===== */
+    #bdBanner {
+      display: none;
+      position: fixed;
+      top: var(--header-height);
+      left: 0; width: 100%;
+      padding: 7px 16px;
+      background: linear-gradient(90deg, #a18cd1, #fbc2eb, #fcb69f, #fbc2eb, #a18cd1);
+      background-size: 300%;
+      animation: bdBannerFlow 6s linear infinite;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      z-index: 999;
+      letter-spacing: 1.5px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    @keyframes bdBannerFlow {
+      0%   { background-position: 0%;   }
+      100% { background-position: 300%; }
+    }
+
+    #bdConfettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2001;
+    }
+
+    /* Birthday Letter Modal */
+    #bdLetterModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9997;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+    #bdLetterModal.show { display: flex; }
+
+    .bd-modal-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #fbc2eb, #a18cd1, #fcb69f, #a18cd1, #fbc2eb);
+      background-size: 300%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: bdShimmer 4s linear infinite;
+      text-align: center;
+    }
+    @keyframes bdShimmer {
+      0%   { background-position: 0%;   }
+      100% { background-position: 300%; }
+    }
+
+    .bd-scene {
+      position: relative;
+      width: 300px;
+      height: 560px;
+    }
+    .bd-letter-clip {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 260px;
+      height: 360px;
+      overflow: hidden;
+    }
+    .bd-canvases {
+      position: absolute;
+      top: 0; left: 0;
+      width: 260px; height: 360px;
+      cursor: crosshair;
+    }
+    .bd-canvases canvas {
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .bd-envelope {
+      position: absolute;
+      top: 354px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      height: 206px;
+      background: linear-gradient(160deg, #e8d5a3 0%, #c8a060 100%);
+      border-radius: 0 0 12px 12px;
+      z-index: 2;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.45), inset 0 -1px 0 rgba(255,255,255,0.15);
+    }
+    .bd-envelope::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      border-left:  140px solid rgba(160,110,50,0.55);
+      border-right: 140px solid rgba(140,90,30,0.55);
+      border-top:   103px solid transparent;
+    }
+    .bd-hint {
+      font-size: 0.84rem;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      opacity: 0;
+      animation: bdHintIn 0.6s 2.4s ease forwards;
+    }
+    @keyframes bdHintIn { to { opacity: 1; } }
+
+    #bdCloseBtn {
+      position: fixed;
+      top: 18px; right: 22px;
+      background: none; border: none;
+      color: rgba(255,255,255,0.35);
+      font-size: 28px; cursor: pointer;
+      z-index: 9999; line-height: 1;
+      transition: color 0.2s;
+    }
+    #bdCloseBtn:hover { color: rgba(255,255,255,0.9); }
+
+    @media (max-width: 480px) {
+      .bd-scene { width: 260px; height: 490px; }
+    }
+
     </style>
 </head>
 <body>
@@ -399,6 +530,29 @@
       <p>您可以通過這個網站輕鬆播放心咲koe的各種哈欠音效，並且可以通過側邊欄的連結關注心咲koe的社交媒體。</p>
       <p>如果您喜歡這個網站，請考慮支持心咲koe！</p>
     </div>
+  </div>
+
+  <!-- 生日橫幅 (3/6 - 3/8) -->
+  <div id="bdBanner">🎂 &nbsp;お誕生日おめでとう！心咲 koe &nbsp;·&nbsp; 生日快樂 🎉</div>
+
+  <!-- 彩帶 / 煙火 Canvas (3/6 - 3/8) -->
+  <canvas id="bdConfettiCanvas"></canvas>
+
+  <!-- 生日信件 Modal (僅 3/6) -->
+  <div id="bdLetterModal">
+    <button id="bdCloseBtn" aria-label="關閉">&times;</button>
+    <div class="bd-modal-title">✉️ &nbsp;有一封信給 koe&nbsp; ✉️</div>
+    <div class="bd-scene">
+      <div class="bd-letter-clip">
+        <div class="bd-canvases" id="bdCanvases">
+          <canvas id="bdMsgCanvas"></canvas>
+          <canvas id="bdPaperCanvas"></canvas>
+          <canvas id="bdFlameCanvas"></canvas>
+        </div>
+      </div>
+      <div class="bd-envelope"></div>
+    </div>
+    <div class="bd-hint">🔥 按住並拖動來燒開信紙…</div>
   </div>
 
   <!-- 頭部 -->
@@ -935,6 +1089,310 @@
         </div>
       </div>
     </div>
+
+  <!-- ====== Birthday Script ====== -->
+  <script>
+  (function () {
+    'use strict';
+
+    const now = new Date();
+    const M = now.getMonth() + 1;
+    const D = now.getDate();
+    const inRange = M === 3 && D >= 6 && D <= 8;
+    const isToday  = M === 3 && D === 6;
+    if (!inRange) return;
+
+    // ── 生日橫幅 ────────────────────────────────────────────────────
+    const bdBanner = document.getElementById('bdBanner');
+    if (bdBanner) bdBanner.style.display = 'block';
+
+    // ── 彩帶 + 煙火 ─────────────────────────────────────────────────
+    const confCanvas = document.getElementById('bdConfettiCanvas');
+    const confCtx = confCanvas.getContext('2d');
+
+    function resizeConf() {
+      confCanvas.width  = window.innerWidth;
+      confCanvas.height = window.innerHeight;
+    }
+    resizeConf();
+    window.addEventListener('resize', resizeConf);
+
+    const COLORS = ['#fbc2eb','#a18cd1','#ffecd2','#fcb69f','#a1c4fd','#c2e9fb','#ffe680','#ff80ab'];
+
+    class Confetti {
+      constructor(randomY) { this.reset(randomY); }
+      reset(randomY = false) {
+        this.x  = Math.random() * confCanvas.width;
+        this.y  = randomY ? Math.random() * confCanvas.height : -12;
+        this.sz = Math.random() * 9 + 4;
+        this.vy = Math.random() * 2 + 0.8;
+        this.vx = Math.random() * 1.2 - 0.6;
+        this.rot = Math.random() * Math.PI * 2;
+        this.rv  = Math.random() * 0.08 - 0.04;
+        this.color  = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.isRect = Math.random() > 0.35;
+      }
+      step() {
+        this.x += this.vx; this.y += this.vy; this.rot += this.rv;
+        if (this.y > confCanvas.height + 15) this.reset();
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        ctx.fillStyle = this.color;
+        if (this.isRect) ctx.fillRect(-this.sz/2, -this.sz*0.3, this.sz, this.sz*0.6);
+        else { ctx.beginPath(); ctx.arc(0,0,this.sz/2,0,Math.PI*2); ctx.fill(); }
+        ctx.restore();
+      }
+    }
+
+    const confPieces = Array.from({ length: 130 }, () => new Confetti(true));
+    const fireworks  = [];
+
+    function spawnFw() {
+      const x   = Math.random() * confCanvas.width * 0.8 + confCanvas.width * 0.1;
+      const y   = Math.random() * confCanvas.height * 0.55 + 40;
+      const hue = Math.random() * 360;
+      const n   = 65;
+      fireworks.push({
+        hue,
+        particles: Array.from({ length: n }, (_, i) => {
+          const a = (i/n) * Math.PI * 2;
+          const s = Math.random() * 4.5 + 1.5;
+          return { x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, al: 1, sz: Math.random()*2.5+0.8 };
+        })
+      });
+    }
+
+    let lastFw = 0;
+    function confLoop(ts) {
+      confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+      confPieces.forEach(p => { p.step(); p.draw(confCtx); });
+
+      if (ts - lastFw > 2800) {
+        spawnFw();
+        if (Math.random() > 0.5) spawnFw();
+        lastFw = ts;
+      }
+      for (let i = fireworks.length - 1; i >= 0; i--) {
+        const fw = fireworks[i];
+        fw.particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy;
+          p.vy += 0.055; p.vx *= 0.975; p.al -= 0.016;
+        });
+        fw.particles = fw.particles.filter(p => p.al > 0);
+        fw.particles.forEach(p => {
+          confCtx.save();
+          confCtx.globalAlpha = p.al;
+          confCtx.fillStyle    = `hsl(${fw.hue},100%,65%)`;
+          confCtx.shadowColor  = `hsl(${fw.hue},100%,75%)`;
+          confCtx.shadowBlur   = 8;
+          confCtx.beginPath(); confCtx.arc(p.x, p.y, p.sz, 0, Math.PI*2); confCtx.fill();
+          confCtx.restore();
+        });
+        if (!fw.particles.length) fireworks.splice(i, 1);
+      }
+      requestAnimationFrame(confLoop);
+    }
+    requestAnimationFrame(confLoop);
+
+    // ── 生日信件（僅 3/6）───────────────────────────────────────────
+    if (!isToday) return;
+
+    // ★ 信件內容，等你確定後填入這裡 ★
+    const LETTER_LINES = [
+      { text: '親愛的 心咲 koe', bold: true, size: 17 },
+      { text: '' },
+      { text: '（信件內容待填入）', size: 15 },
+      { text: '' },
+      { text: '生日快樂 ✨', bold: true, size: 16 },
+      { text: '' },
+      { text: '來自：你的粉絲', size: 14 },
+    ];
+
+    function initLetter() {
+      const modal = document.getElementById('bdLetterModal');
+      if (!modal || sessionStorage.getItem('bdLetterDone')) return;
+
+      modal.classList.add('show');
+
+      const W = window.innerWidth <= 480 ? 230 : 260;
+      const H = window.innerWidth <= 480 ? 310 : 360;
+
+      // 調整 canvas 區塊尺寸
+      const bdCanvases = document.getElementById('bdCanvases');
+      bdCanvases.style.width  = W + 'px';
+      bdCanvases.style.height = H + 'px';
+      document.querySelector('.bd-letter-clip').style.width  = W + 'px';
+      document.querySelector('.bd-letter-clip').style.height = H + 'px';
+
+      // 信件從信封滑出動畫
+      bdCanvases.style.transform = `translateY(${H}px)`;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        bdCanvases.style.transition = 'transform 1.5s cubic-bezier(0.25,0.46,0.45,0.94)';
+        bdCanvases.style.transform  = 'translateY(0)';
+      }));
+
+      // Canvas 初始化
+      const msgC = document.getElementById('bdMsgCanvas');
+      const papC = document.getElementById('bdPaperCanvas');
+      const flmC = document.getElementById('bdFlameCanvas');
+      [msgC, papC, flmC].forEach(c => { c.width = W; c.height = H; });
+
+      // ── 訊息層（信件底）──
+      const msgCtx = msgC.getContext('2d');
+      msgCtx.fillStyle = '#fdf6e3';
+      msgCtx.fillRect(0, 0, W, H);
+      // 橫線
+      msgCtx.strokeStyle = 'rgba(180,155,110,0.35)';
+      msgCtx.lineWidth = 1;
+      for (let y = 44; y < H - 20; y += 28) {
+        msgCtx.beginPath(); msgCtx.moveTo(18, y); msgCtx.lineTo(W-18, y); msgCtx.stroke();
+      }
+      // 紅邊線
+      msgCtx.strokeStyle = 'rgba(200,90,90,0.3)';
+      msgCtx.lineWidth = 1.5;
+      msgCtx.beginPath(); msgCtx.moveTo(38, 8); msgCtx.lineTo(38, H-8); msgCtx.stroke();
+      // 文字
+      let ty = 52;
+      LETTER_LINES.forEach(({ text, bold, size = 15 }) => {
+        if (text) {
+          msgCtx.fillStyle = '#2a1a0a';
+          msgCtx.font = `${bold ? 'bold ' : ''}${size}px 'Noto Sans TC', sans-serif`;
+          msgCtx.textAlign = 'center';
+          msgCtx.fillText(text, W / 2, ty);
+        }
+        ty += 38;
+      });
+
+      // ── 紙層（覆蓋訊息，被燒掉）──
+      const papCtx = papC.getContext('2d');
+      papCtx.fillStyle = '#fdf0d8';
+      papCtx.fillRect(0, 0, W, H);
+      // 紙張紋理
+      for (let i = 0; i < 1200; i++) {
+        papCtx.fillStyle = `rgba(0,0,0,${Math.random() * 0.03})`;
+        papCtx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
+      }
+      // 暈影
+      const vg = papCtx.createRadialGradient(W/2, H/2, W*0.3, W/2, H/2, W*0.9);
+      vg.addColorStop(0, 'transparent');
+      vg.addColorStop(1, 'rgba(120,80,20,0.12)');
+      papCtx.fillStyle = vg;
+      papCtx.fillRect(0, 0, W, H);
+
+      // ── 火焰層 ──
+      const flmCtx = flmC.getContext('2d');
+      const flames  = [];
+
+      function addFlames(x, y) {
+        for (let i = 0; i < 7; i++) {
+          flames.push({
+            x: x + (Math.random()-0.5)*18,
+            y: y + (Math.random()-0.5)*10,
+            vx: (Math.random()-0.5)*1.5,
+            vy: -(Math.random()*2.5+0.8),
+            life: 1, sz: Math.random()*7+3, hue: Math.random()*40+10
+          });
+        }
+      }
+
+      function burnAt(x, y) {
+        // 燒掉紙層
+        papCtx.save();
+        papCtx.globalCompositeOperation = 'destination-out';
+        const g = papCtx.createRadialGradient(x, y, 0, x, y, 26);
+        g.addColorStop(0,    'rgba(0,0,0,1)');
+        g.addColorStop(0.65, 'rgba(0,0,0,0.85)');
+        g.addColorStop(1,    'rgba(0,0,0,0)');
+        papCtx.fillStyle = g;
+        papCtx.beginPath(); papCtx.arc(x, y, 26, 0, Math.PI*2); papCtx.fill();
+        // 燒焦邊緣
+        papCtx.globalCompositeOperation = 'source-over';
+        papCtx.strokeStyle = 'rgba(90,40,10,0.6)';
+        papCtx.lineWidth = 2.5;
+        papCtx.beginPath(); papCtx.arc(x, y, 26, 0, Math.PI*2); papCtx.stroke();
+        papCtx.restore();
+        addFlames(x, y);
+      }
+
+      // 燒了多少（定期檢查）
+      let checkTimer = 0;
+      let celebrated = false;
+      function checkBurn() {
+        if (++checkTimer % 40 !== 0 || celebrated) return;
+        const d = papCtx.getImageData(0, 0, W, H).data;
+        let t = 0;
+        for (let i = 3; i < d.length; i += 4) if (d[i] < 50) t++;
+        if (t / (W * H) > 0.65) { celebrated = true; celebrate(); }
+      }
+
+      // 火焰動畫
+      function flameLoop() {
+        flmCtx.clearRect(0, 0, W, H);
+        for (let i = flames.length - 1; i >= 0; i--) {
+          const p = flames[i];
+          p.x += p.vx; p.y += p.vy;
+          p.life -= 0.048; p.sz *= 0.97;
+          if (p.life <= 0) { flames.splice(i, 1); continue; }
+          flmCtx.save();
+          flmCtx.globalAlpha  = p.life * 0.88;
+          flmCtx.fillStyle    = `hsl(${p.hue},100%,${55+(1-p.life)*25}%)`;
+          flmCtx.shadowColor  = `hsl(${p.hue+15},100%,65%)`;
+          flmCtx.shadowBlur   = 14;
+          flmCtx.beginPath(); flmCtx.arc(p.x, p.y, p.sz, 0, Math.PI*2); flmCtx.fill();
+          flmCtx.restore();
+        }
+        checkBurn();
+        requestAnimationFrame(flameLoop);
+      }
+      flameLoop();
+
+      // 滑鼠 / 觸控事件
+      let burning = false;
+      function getXY(e) {
+        const r   = flmC.getBoundingClientRect();
+        const src = e.touches ? e.touches[0] : e;
+        return {
+          x: (src.clientX - r.left) * W / r.width,
+          y: (src.clientY - r.top)  * H / r.height
+        };
+      }
+      flmC.addEventListener('mousedown',  e => { burning = true;  const p = getXY(e); burnAt(p.x, p.y); });
+      flmC.addEventListener('mousemove',  e => { if (burning) { const p = getXY(e); burnAt(p.x, p.y); } });
+      flmC.addEventListener('mouseup',    () => burning = false);
+      flmC.addEventListener('mouseleave', () => burning = false);
+      flmC.addEventListener('touchstart', e => { e.preventDefault(); burning = true;  const p = getXY(e); burnAt(p.x, p.y); }, { passive: false });
+      flmC.addEventListener('touchmove',  e => { e.preventDefault(); if (burning) { const p = getXY(e); burnAt(p.x, p.y); } }, { passive: false });
+      flmC.addEventListener('touchend',   () => burning = false);
+
+      // 關閉按鈕
+      function closeModal() {
+        modal.classList.remove('show');
+        sessionStorage.setItem('bdLetterDone', '1');
+      }
+      document.getElementById('bdCloseBtn').addEventListener('click', closeModal);
+      modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    }
+
+    function celebrate() {
+      // 慶祝煙火爆發
+      for (let i = 0; i < 6; i++) {
+        setTimeout(spawnFw, i * 250);
+        setTimeout(spawnFw, i * 250 + 125);
+      }
+      // 關閉 modal
+      setTimeout(() => {
+        const modal = document.getElementById('bdLetterModal');
+        if (modal) modal.classList.remove('show');
+        sessionStorage.setItem('bdLetterDone', '1');
+      }, 700);
+    }
+
+    window.addEventListener('load', () => setTimeout(initLetter, 1400));
+  })();
+  </script>
 
   </body>
 </html>
