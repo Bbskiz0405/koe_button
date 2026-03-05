@@ -3,7 +3,9 @@
     "allow": [
       "Bash(git clone:*)",
       "WebSearch",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(npx firebase-tools:*)"
     ],
     "deny": [],
     "ask": []

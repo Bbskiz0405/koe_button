@@ -1456,14 +1456,21 @@
       drawEnvBody(bodyCv, ENV_COLS, ENV_ROWS);
       drawEnvFlap(flapCv, ENV_COLS, ENV_FROWS);
 
-      // ── Canvas 初始化 ──
+      // ── Canvas 初始化（乘上 DPR 避免 Retina 螢幕模糊）──
+      const dpr = window.devicePixelRatio || 1;
       const msgC = document.getElementById('bdMsgCanvas');
       const papC = document.getElementById('bdPaperCanvas');
       const flmC = document.getElementById('bdFlameCanvas');
-      [msgC, papC, flmC].forEach(c => { c.width = W; c.height = H; });
+      [msgC, papC, flmC].forEach(c => {
+        c.width  = W * dpr;
+        c.height = H * dpr;
+        c.style.width  = W + 'px';
+        c.style.height = H + 'px';
+      });
 
       // 訊息層（賀卡圖片）
       const msgCtx = msgC.getContext('2d');
+      msgCtx.scale(dpr, dpr);
       const cardImg = new Image();
       cardImg.onload = () => {
         msgCtx.fillStyle = '#fdf6e3';
@@ -1474,6 +1481,7 @@
 
       // 紙層（牛皮紙，被燒掉）
       const papCtx = papC.getContext('2d');
+      papCtx.scale(dpr, dpr);
       const papGrad = papCtx.createLinearGradient(0, 0, W, H);
       papGrad.addColorStop(0,   '#e8d8a8');
       papGrad.addColorStop(0.5, '#ddc888');
@@ -1492,6 +1500,7 @@
 
       // 火焰粒子
       const flmCtx = flmC.getContext('2d');
+      flmCtx.scale(dpr, dpr);
       const flames  = [];
       function addFlames(x, y) {
         if (flames.length > 180) return;
@@ -1518,10 +1527,10 @@
       let checkTimer = 0, celebrated = false;
       function checkBurn() {
         if (++checkTimer % 40 !== 0 || celebrated) return;
-        const d = papCtx.getImageData(0, 0, W, H).data;
+        const d = papCtx.getImageData(0, 0, W*dpr, H*dpr).data;
         let t = 0;
         for (let i = 3; i < d.length; i += 4) if (d[i] < 50) t++;
-        if (t / (W*H) > 0.92) { celebrated = true; celebrate(); }
+        if (t / (W*dpr * (H*dpr)) > 0.92) { celebrated = true; celebrate(); }
       }
 
       // 火焰蔓延系統
